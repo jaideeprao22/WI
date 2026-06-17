@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>World Intelligence — Telangana civic health console</title>
+<meta name="description" content="A working demonstration: listen to lived reality, forecast risk, rehearse the response, and dispatch Telugu action through trusted messengers.">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="styles.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A1416">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+
+<!-- ================= TOP BAR ================= -->
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand">
+      <div class="seal">WI</div>
+      <div class="wordmark">
+        <b>World Intelligence</b>
+        <span>Telangana civic health console</span>
+      </div>
+    </div>
+    <div class="state" id="stateChips">
+      <span class="chip">data <span class="chip-v" id="scData">—</span></span>
+      <span class="chip">model <span class="chip-v" id="scModel">—</span></span>
+      <span class="chip live">LRKUs <span class="chip-v" id="scLrku">—</span></span>
+      <span class="chip">campaigns <span class="chip-v" id="scCamp">—</span></span>
+      <span class="chip boost">model boost <span class="chip-v" id="scBoost">—</span></span>
+      <button class="btn sm" id="installBtn" style="display:none">⤓ Install</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <p class="eyebrow">An intelligence trained on what people actually do — not on the internet</p>
+    <h1>Hear the village. Forecast the harm. <em>Act before it spreads.</em></h1>
+    <p>Most health systems learn about a rumour or an outbreak after it has already cost someone. This console closes the loop end to end: it structures lived reports from the field, forecasts how a belief or a disease moves across districts, rehearses which response works, and sends a Telugu message through the messenger people trust — then learns from what comes back.</p>
+  </section>
+
+  <!-- ================= PIPELINE (signature) ================= -->
+  <section class="pipe" id="pipe">
+    <div class="pipe-head">
+      <span class="lbl">The closed loop</span>
+      <button class="btn primary" id="runLoop">▶ Run the full loop</button>
+    </div>
+    <div class="pipe-track">
+      <svg class="pipe-wire" viewBox="0 0 100 2" preserveAspectRatio="none" aria-hidden="true">
+        <line x1="10" y1="1" x2="90" y2="1"></line>
+        <line class="flow" x1="10" y1="1" x2="90" y2="1"></line>
+      </svg>
+      <div class="node" data-stage="0"><div class="dot">1</div><div class="nm">Listen</div><div class="sub">field reports, rumours, calls</div></div>
+      <div class="node" data-stage="1"><div class="dot">2</div><div class="nm">Structure</div><div class="sub">classify domain &amp; risk</div></div>
+      <div class="node" data-stage="2"><div class="dot">3</div><div class="nm">Forecast</div><div class="sub">spread across districts</div></div>
+      <div class="node" data-stage="3"><div class="dot">4</div><div class="nm">Act</div><div class="sub">choose the response</div></div>
+      <div class="node" data-stage="4"><div class="dot">5</div><div class="nm">Deliver</div><div class="sub">Telugu via trusted voice</div></div>
+    </div>
+    <div class="pipe-out" id="pipeOut">Press <b>Run the full loop</b> to send one real field signal through all five stages.</div>
+  </section>
+
+  <!-- ================= TABS ================= -->
+  <nav class="tabs" id="tabs" role="tablist">
+    <button class="tab active" data-tab="overview" role="tab"><span class="ix">00</span>Overview</button>
+    <button class="tab" data-tab="world" role="tab"><span class="ix">01</span>World Intelligence</button>
+    <button class="tab" data-tab="praja" role="tab"><span class="ix">02</span>Praja Intelligence</button>
+    <button class="tab" data-tab="darpan" role="tab"><span class="ix">03</span>Praja Darpan</button>
+    <button class="tab" data-tab="shield" role="tab"><span class="ix">04</span>Infodemic Shield</button>
+    <button class="tab" data-tab="aarogyam" role="tab"><span class="ix">05</span>Aarogyam 365</button>
+    <button class="tab" data-tab="voice" role="tab"><span class="ix">06</span>Jeevana Voice</button>
+    <button class="tab" data-tab="safety" role="tab"><span class="ix">07</span>Safety Guard</button>
+    <button class="tab" data-tab="trust" role="tab"><span class="ix">08</span>Trust Network</button>
+    <button class="tab" data-tab="ops" role="tab"><span class="ix">09</span>PHC Ops</button>
+    <button class="tab" data-tab="brief" role="tab"><span class="ix">10</span>Minister Brief</button>
+    <button class="tab" data-tab="recall" role="tab"><span class="ix">11</span>NCD Recall</button>
+    <button class="tab" data-tab="patients" role="tab"><span class="ix">12</span>Patient Queue</button>
+  </nav>
+
+  <!-- ---------- 00 OVERVIEW ---------- -->
+  <section class="panel show" id="p-overview" role="tabpanel">
+    <div class="panel-head">
+      <span class="k">00 — Situation</span>
+      <h2>System state</h2>
+      <p>Everything below runs on one in-browser engine that behaves like a real backend: a data store, a REST-style API, and a model. Nothing here is mocked — every figure is computed live from the seed data and from what you add this session.</p>
+    </div>
+    <div class="kpis" style="margin-top:18px">
+      <div class="kpi live"><div class="kpi-v" id="kLrku">—</div><div class="kpi-l">structured field units (LRKUs)</div></div>
+      <div class="kpi"><div class="kpi-v" id="kDist">—</div><div class="kpi-l">districts modelled</div></div>
+      <div class="kpi"><div class="kpi-v" id="kCamp">—</div><div class="kpi-l">campaigns dispatched</div></div>
+      <div class="kpi gold"><div class="kpi-v" id="kBoost">—</div><div class="kpi-l">model confidence boost</div></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Today's worklist <span class="hint">what needs action now, pulled from the whole system</span></h3>
+      <div id="todayList" class="worklist"></div>
+    </div>
+    <div class="grid g-5-7">
+      <div class="card">
+        <h3>Highest-signal districts <span class="hint">all domains</span></h3>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>District</th><th>Signal</th><th>Field units</th></tr></thead>
+          <tbody id="ovSignals"></tbody></table>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Live event log <span class="hint">most recent first</span></h3>
+        <div class="tbl-wrap" style="max-height:300px">
+          <table><thead><tr><th>Time</th><th>Type</th><th>Detail</th></tr></thead>
+          <tbody id="ovEvents"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- 01 WORLD INTELLIGENCE ---------- -->
+  <section class="panel" id="p-world" role="tabpanel">
+    <div class="panel-head">
+      <span class="k">01 — Listen &amp; structure</span>
+      <h2>World Intelligence — the lived-reality knowledge bank</h2>
+      <p>The raw material no frontier model has: what a real household believed, what they did, and what happened. Each report is captured as a <b>Lived-Reality Knowledge Unit (LRKU)</b> — consented, structured, and ready to feed the model. Add one and watch it flow into the signals and the map.</p>
+    </div>
+    <div class="grid g-1-1-form">
+      <div class="card tint">
+        <h3>Capture a field report</h3>
+        <div class="field"><label>District</label><select class="select" id="wDistrict"></select></div>
+        <div class="row">
+          <div class="field"><label>Domain</label><select class="select" id="wDomain"></select></div>
+          <div class="field"><label>Reported by</label>
+            <select class="select" id="wContrib"><option>ASHA</option><option>ANM</option><option>PHC doctor</option><option>SHG leader</option><option>teacher</option><option>volunteer</option></select></div>
+        </div>
+        <div class="field"><label>What did they believe?</label><textarea class="ta" id="wBelief" placeholder="e.g. Papaya leaf juice will cure dengue, so no need for a blood test"></textarea></div>
+        <div class="field"><label>Situation / what happened</label><input class="input" id="wSituation" placeholder="e.g. Delayed testing 3 days, then admitted with low platelets"></div>
+        <button class="btn primary" id="wAdd">Add to knowledge bank</button>
+        <span id="wMsg" style="margin-left:10px;font-size:12px;color:var(--live)"></span>
+      </div>
+      <div class="card">
+        <h3>Knowledge bank <span class="hint" id="wCount">—</span></h3>
+        <div class="tbl-wrap" style="max-height:430px">
+          <table><thead><tr><th>ID</th><th>District</th><th>Domain</th><th>Belief</th></tr></thead>
+          <tbody id="wTable"></tbody></table>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>LRKU quality and action card <span class="hint">turn a story into usable intelligence</span></h3>
+      <p style="font-size:13px;color:var(--muted);margin-top:0">Checks whether the lived-reality record is complete enough to use for policy, PHC action, or AI training. This prevents noisy stories from becoming unsafe intelligence.</p>
+      <button class="btn primary sm" id="wAnalyze">Analyze latest LRKU</button>
+      <button class="btn sm" id="wAnalyzeCopy">Copy action card</button>
+      <pre class="console-out mini" id="wAnalyzeOut">Click analyze after adding or selecting a field report.</pre>
+    </div>
+  </section>
+
+  <!-- ---------- 02 PRAJA INTELLIGENCE ---------- -->
+  <section class="panel" id="p-praja" role="tabpanel">
+    <div class="panel-head">
+      <span class="k">02 — Sense</span>
+      <h2>Praja Intelligence — the signal map</h2>
+      <p>Field units plus baseline district risk produce a live signal score for every district. Switch domains to see where the system would direct attention today. Anything you added in tab 01 has already moved these numbers.</p>
+    </div>
+    <div class="row" style="margin-top:16px">
+      <div class="field" style="max-width:260px"><label>Domain</label><select class="select" id="sDomain"></select></div>
+    </div>
+    <div class="grid g-5-7">
+      <div class="card">
+        <h3>Ranked districts</h3>
+        <div class="tbl-wrap" style="max-height:430px">
+          <table><thead><tr><th>District</th><th>Signal</th><th>Units</th><th>Households</th></tr></thead>
+          <tbody id="sTable"></tbody></table>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Geographic signal</h3>
+        <div id="map"></div>
+        <div class="legend">
+          <span><i class="dotc" style="background:var(--live)"></i> lower signal</span>
+          <span><i class="dotc" style="background:var(--warn)"></i> elevated</span>
+          <span><i class="dotc" style="background:var(--risk)"></i> high — act first</span>
+          <span id="mapNote" style="margin-left:auto;color:var(--faint)"></span>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Use real surveillance data <span class="hint">replace synthetic risk with actual numbers</span></h3>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 12px">Import a CSV with a <b>district</b> column and any of <b>dengue, heat, ncd, vaccine, maternal, rabies</b> (values 0–1, or 0–100 and it scales). Matching districts update instantly across the map, signals and forecast — so the model runs on real IDSP/field numbers, not assumptions. Download the template to see the exact format.</p>
+      <div class="row">
+        <input type="file" id="csvFile" accept=".csv,text/csv" class="input" style="max-width:260px;padding:7px">
+        <button class="btn primary sm" id="csvImport">Import &amp; recompute</button>
+        <button class="btn sm" id="csvTemplate">Download template</button>
+        <button class="btn sm" id="csvExport">Export current signals</button>
+        <button class="btn sm gold" id="csvReset" style="display:none">Revert to synthetic</button>
+        <span id="csvMsg" style="font-size:12px;color:var(--live)"></span>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>UPHC microplan generator <span class="hint">convert signal into field plan</span></h3>
+      <p style="font-size:13px;color:var(--muted);margin-top:0">Generates target households, ASHA field days, campaign days, trusted messenger and four field tasks for the selected district/domain.</p>
+      <button class="btn primary sm" id="sMicroRun">Generate microplan for selected domain</button>
+      <button class="btn sm" id="sMicroCopy">Copy microplan</button>
+      <pre class="console-out mini" id="sMicroOut">Select a domain and generate a microplan.</pre>
+    </div>
+  </section>
+
+  <!-- ---------- 03 PRAJA DARPAN ---------- -->
+  <section class="panel" id="p-darpan" role="tabpanel">
+    <div class="panel-head">
+      <span class="k">03 — Forecast &amp; decide</span>
+      <h2>Praja Darpan — rehearse the response before you fund it</h2>
+      <p>Seed a belief in one district and watch it move through that district and its eight geographic neighbours over 30 days. Then test each response and read the decision panel: who is protected, and at what cost per household.</p>
+    </div>
+    <div class="grid g-5-7">
+      <div class="card tint">
+        <h3>Scenario</h3>
+        <div class="field"><label>Domain</label><select class="select" id="dDomain"></select></div>
+        <div class="field"><label>Seed district</label><select class="select" id="dSeed"></select></div>
+        <div class="field"><label>Response to test</label>
+          <div class="seg" id="dSeg">
+            <button data-iv="none" class="on">No action</button>
+            <button data-iv="asha">ASHA audio</button>
+            <button data-iv="doctor">Doctor video</button>
+            <button data-iv="shg">SHG meeting</button>
+            <button data-iv="combined">Combined</button>
+          </div>
+        </div>
+        <div class="roi" id="dRoi"></div>
+        <div class="verdict" id="dVerdict" style="display:none"></div>
+      </div>
+      <div class="card">
+        <h3>30-day spread <span class="hint">% of households reached by the belief</span></h3>
+        <svg class="chart" id="dChart" viewBox="0 0 560 230" preserveAspectRatio="none" role="img" aria-label="Forecast chart"></svg>
+        <div class="chart-key">
+          <span><i class="lk" style="background:var(--risk)"></i><b>No action</b> — belief spreads unchecked</span>
+          <span><i class="lk" style="background:var(--live)"></i><b id="dKeySel">Selected response</b></span>
+        </div>
+        <p style="font-size:11.5px;color:var(--faint);margin:12px 0 0">Illustrative mechanistic model on real district population and capacity data. Effectiveness values are planning assumptions, not measured field outcomes.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Budget optimizer <span class="hint">best intervention under a fixed rupee limit</span></h3>
+      <div class="row"><div class="field" style="max-width:220px"><label>Available budget</label><input class="input" id="dBudget" type="number" value="50000" min="0"></div><button class="btn primary sm" id="dOptRun">Find best option</button><button class="btn sm" id="dOptCopy">Copy recommendation</button></div>
+      <pre class="console-out mini" id="dOptOut">Run the optimizer after choosing a scenario.</pre>
+    </div>
+  </section>
+
+  <!-- ---------- 04 INFODEMIC SHIELD ---------- -->
+  <section class="panel" id="p-shield" role="tabpanel">
+    <div class="panel-head">
+      <span class="k">04 — Counter</span>
+      <h2>Infodemic Shield — classify a rumour, get the counter-message</h2>
+      <p>Paste a claim in English or Telugu. The engine identifies the health domain and the specific risk it creates, picks the messenger most likely to be believed, and returns a vetted Telugu message — never a dosage, always a route to care.</p>
+    </div>
+    <div class="grid g-1-1-form">
+      <div class="card tint">
+        <h3>Incoming claim</h3>
+        <div class="field"><textarea class="ta" id="cText" style="min-height:96px" placeholder="Paste a health claim in English or Telugu…">Papaya leaf juice fixes platelets, so a dengue test isn't needed.</textarea></div>
+        <div class="row" style="margin-bottom:10px">
+          <button class="btn sm" data-ex="Papaya leaf juice fixes platelets, so a dengue test isn't needed.">Dengue</button>
+          <button class="btn sm" data-ex="Once sugar feels normal you can stop the diabetes tablets.">Diabetes</button>
+          <button class="btn sm" data-ex="The vaccine causes infertility, better to skip it.">Vaccine</button>
+          <button class="btn sm" data-ex="A dog bite from a healthy-looking dog needs no injection.">Rabies</button>
+        </div>
+        <button class="btn primary" id="cBtn">Classify &amp; counter</button>
+      </div>
+      <div>
+        <div class="cls" id="cResult">
+          <div class="cls-top">
+            <span class="risk-name" id="cRisk">—</span>
+            <span class="tg" id="cConf">—</span>
+            <span class="dom" id="cDom">—</span>
+          </div>
+          <div class="cls-body">
+            <div class="te" id="cTe">—</div>
+            <div class="en" id="cEn">—</div>
+            <div class="cls-msgr">Send through: <b id="cMsgr">—</b></div>
+            <button class="btn sm" id="cWhats" style="margin-top:13px">Send on WhatsApp</button>
+            <button class="btn sm" id="cCopy" style="margin-top:13px">Copy</button>
+            <button class="btn gold sm" id="cDispatch" style="margin-top:13px">Log dispatch →</button>
+            <span id="cDispMsg" style="margin-left:10px;font-size:12px;color:var(--gold)"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Counter-message pack <span class="hint">ASHA audio + doctor line + SHG message</span></h3>
+      <button class="btn primary sm" id="cPackRun">Generate pack</button>
+      <button class="btn sm" id="cPackCopy">Copy pack</button>
+      <button class="btn sm" id="cPackWhats">WhatsApp pack</button>
+      <pre class="console-out mini" id="cPackOut">Classify a claim, then generate a full field-ready pack.</pre>
+    </div>
+  </section>
+
+  <!-- ---------- 05 AAROGYAM 365 ---------- -->
+  <section class="panel" id="p-aarogyam" role="tabpanel">
+    <div class="panel-head">
+      <span class="k">05 — Deliver &amp; learn</span>
+      <h2>Aarogyam 365 — a year of action, and the loop that closes</h2>
+      <p>One vetted prevention action per month, dispatched to a district, then measured. When field feedback comes back, the model's confidence boost rises — the system gets sharper from contact with reality. That return path is the whole point.</p>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <h3>Annual prevention calendar</h3>
+      <div class="cal" id="calGrid"></div>
+    </div>
+    <div class="grid g-1-1-form" style="margin-top:16px">
+      <div class="card tint">
+        <h3>Dispatch &amp; measure</h3>
+        <div class="row">
+          <div class="field"><label>Domain</label><select class="select" id="aDomain"></select></div>
+          <div class="field"><label>District</label><select class="select" id="aDistrict"></select></div>
+        </div>
+        <div class="row" style="margin-top:4px">
+          <button class="btn primary" id="aDispatch">Dispatch campaign</button>
+          <button class="btn" id="aWhats">Send on WhatsApp</button>
+          <button class="btn gold" id="aFeedback">Record field feedback</button>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin:13px 0 0">Feedback nudges <b style="color:var(--gold)">model boost</b> (top right) upward — visible proof the loop is closed.</p>
+      </div>
+      <div class="card">
+        <h3>Campaigns <span class="hint" id="aCount">—</span></h3>
+        <div class="tbl-wrap" style="max-height:300px">
+          <table><thead><tr><th>ID</th><th>District</th><th>Domain</th><th>Reached</th></tr></thead>
+          <tbody id="aTable"></tbody></table>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Family action checklist <span class="hint">printable / WhatsApp-ready household slip</span></h3>
+      <div class="row"><div class="field" style="max-width:220px"><label>Month</label><select class="select" id="aMonth"></select></div><button class="btn primary sm" id="aCheckRun">Generate checklist</button><button class="btn sm" id="aCheckCopy">Copy</button><button class="btn sm" id="aCheckWhats">WhatsApp</button></div>
+      <pre class="console-out mini" id="aCheckOut">Generate a district-specific family checklist.</pre>
+    </div>
+  </section>
+
+
+
+  <!-- ---------- 06 JEEVANA VOICE ---------- -->
+  <section class="panel" id="p-voice" role="tabpanel">
+    <div class="panel-head">
+      <span class="k">06 — Patient interface</span>
+      <h2>Jeevana-1 Telugu voice kiosk</h2>
+      <p>A patient-facing PHC mode: receive a Telugu question by typing or mic, generate a safe Telugu answer, speak it back, and save the exchange as an LRKU. This works without any external API; it can later be connected to OpenRouter/Sarvam/Bhashini.</p>
+    </div>
+    <div class="grid g-5-7">
+      <div class="card tint">
+        <h3>Ask Jeevana-1</h3>
+        <div class="field"><label>PHC mode</label><select class="select" id="vMode"><option value="auto">Auto classify</option><option value="dengue">Fever / Dengue</option><option value="ncd">BP / Sugar</option><option value="maternal">Pregnancy danger signs</option><option value="rabies">Dog bite / Snakebite</option><option value="heat">Heat illness</option><option value="vaccine">Vaccine</option></select></div>
+        <div class="field"><label>Telugu question / patient concern</label><textarea class="ta telugu" id="vQuestion">మా బస్తీలో జ్వరం కేసులు పెరుగుతున్నాయి. బొప్పాయి ఆకుల రసం తాగితే డెంగ్యూ టెస్ట్ అవసరం లేదంటున్నారు. నేను ఏమి చేయాలి?</textarea></div>
+        <div class="row">
+          <button class="btn" id="vListen">🎙 Listen Telugu</button>
+          <button class="btn primary" id="vAsk">Answer safely</button>
+          <button class="btn" id="vSpeak">▶ Speak answer</button>
+          <button class="btn gold" id="vSave">Save as LRKU</button>
+        </div>
+        <div class="help" id="vStatus">Mic uses browser speech recognition when available. Typing always works.</div>
+      </div>
+      <div class="card">
+        <h3>Patient answer <span class="hint">Telugu-only safe guidance</span></h3>
+        <div class="answer-box" id="vAnswer">Answer will appear here.</div>
+        <div class="row" style="margin-top:10px"><button class="btn sm" id="vWhats">Send on WhatsApp</button><button class="btn sm" id="vCopy">Copy answer</button></div>
+        <div class="kiosk-note">Boundary: no diagnosis, no drug dose, no prescription. Danger signs trigger PHC staff referral.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- 07 SAFETY GUARD ---------- -->
+  <section class="panel" id="p-safety" role="tabpanel">
+    <div class="panel-head">
+      <span class="k">07 — Praja Suraksha</span>
+      <h2>AI safety guardrail and red-flag triage</h2>
+      <p>This is the layer that prevents the project from looking dangerous: every patient question is screened for danger signs, routed to PHC staff if needed, and logged for audit.</p>
+    </div>
+    <div class="grid g-1-1-form">
+      <div class="card tint">
+        <h3>Run safety screen</h3>
+        <div class="field"><label>Text to screen</label><textarea class="ta" id="gText">గర్భిణీకి తీవ్రమైన తలనొప్పి, కాళ్ల వాపు ఉంది.</textarea></div>
+        <button class="btn primary" id="gBtn">Run Praja Suraksha</button>
+        <div id="gOut" class="safe-card"></div>
+      </div>
+      <div class="card">
+        <h3>Safety audit log</h3>
+        <div class="tbl-wrap" style="max-height:330px"><table><thead><tr><th>Audit</th><th>Level</th><th>Domain</th><th>Route</th></tr></thead><tbody id="gAudit"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- 08 TRUST NETWORK ---------- -->
+  <section class="panel" id="p-trust" role="tabpanel">
+    <div class="panel-head">
+      <span class="k">08 — Behaviour change</span>
+      <h2>Trust Network Planner</h2>
+      <p>The system should not merely generate a message; it should choose who should say it. This module ranks ASHA, ANM, PHC doctor, SHG leader, teacher and civic announcement by district trust and cost per reached household.</p>
+    </div>
+    <div class="grid g-5-7">
+      <div class="card tint">
+        <h3>Plan the messenger</h3>
+        <div class="field"><label>Domain</label><select class="select" id="tDomain"></select></div>
+        <div class="field"><label>District</label><select class="select" id="tDistrict"></select></div>
+        <button class="btn primary" id="tBtn">Generate trust plan</button>
+        <div id="tVerdict" class="verdict go" style="display:none"></div>
+      </div>
+      <div class="card">
+        <h3>Messenger ranking</h3>
+        <div id="tBars" class="rankbars"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- 09 PHC OPS ---------- -->
+  <section class="panel" id="p-ops" role="tabpanel">
+    <div class="panel-head">
+      <span class="k">09 — Accountability</span>
+      <h2>PHC action queue</h2>
+      <p>Forecasting is not enough. This converts intelligence into accountable tasks: who does what, by when, and whether it was completed.</p>
+    </div>
+    <div class="grid g-1-1-form">
+      <div class="card tint">
+        <h3>Create PHC tasks</h3>
+        <div class="row"><div class="field"><label>Domain</label><select class="select" id="oDomain"></select></div><div class="field"><label>District</label><select class="select" id="oDistrict"></select></div></div>
+        <div class="field"><label>Urgency</label><select class="select" id="oUrgency"><option>24 hours</option><option selected>48 hours</option><option>7 days</option></select></div>
+        <button class="btn primary" id="oMake">Create action queue</button>
+        <div id="oOut" class="output-lite"></div>
+      </div>
+      <div class="card">
+        <h3>Open tasks</h3>
+        <div class="tbl-wrap" style="max-height:360px"><table><thead><tr><th>Task</th><th>Assigned</th><th>Urgency</th><th>Status</th></tr></thead><tbody id="oTable"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- 10 MINISTER BRIEF ---------- -->
+  <section class="panel" id="p-brief" role="tabpanel">
+    <div class="panel-head">
+      <span class="k">10 — Decision room</span>
+      <h2>One-click minister brief</h2>
+      <p>A professional summary that turns the whole app into a government decision-support story: current signal, forecast, action, cost, messenger, safety boundary and next 72-hour plan.</p>
+    </div>
+    <div class="grid g-5-7">
+      <div class="card tint">
+        <h3>Generate brief</h3>
+        <button class="btn primary" id="bMake">Generate minister brief</button>
+        <button class="btn" id="bCopy">Copy brief</button>
+        <button class="btn gold" id="bPrint">Print / Save as PDF</button>
+        <p class="help">Use browser Print → Save as PDF for a shareable file.</p>
+      </div>
+      <div class="card">
+        <h3>Brief preview</h3>
+        <pre id="bOut" class="brief-box">Click generate.</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- 11 NCD RECALL ---------- -->
+  <section class="panel" id="p-recall" role="tabpanel">
+    <div class="panel-head">
+      <span class="k">11 — Close the care gap</span>
+      <h2>NCD recall — chase the patients who stopped coming</h2>
+      <p>The quietest failure in primary care is the BP or diabetes patient who misses follow-up and is lost until a crisis. Generate a recall for a district: the system raises an ANM/ASHA task in PHC Ops and hands you the vetted Telugu reminder to send.</p>
+    </div>
+    <div class="grid g-1-1-form">
+      <div class="card tint">
+        <h3>Generate a recall</h3>
+        <div class="field"><label>District</label><select class="select" id="rDistrict"></select></div>
+        <div class="row">
+          <div class="field"><label>Patients due</label><input class="input" id="rCount" type="number" value="120" min="1"></div>
+          <div class="field"><label>Missed follow-up (days)</label><input class="input" id="rDays" type="number" value="60" min="1"></div>
+        </div>
+        <button class="btn primary" id="rMake">Generate recall + task</button>
+        <p style="font-size:12px;color:var(--muted);margin:12px 0 0">Each recall auto-raises a task in <b>PHC Ops</b> (tab 09). Send the Telugu reminder to a field worker's WhatsApp straight from the list.</p>
+      </div>
+      <div class="card">
+        <h3>Recall list <span class="hint" id="rCount2">—</span></h3>
+        <div class="tbl-wrap" style="max-height:430px">
+          <table><thead><tr><th>ID</th><th>District</th><th>Patients</th><th>Send</th></tr></thead>
+          <tbody id="rTable"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- 12 PATIENT QUEUE ---------- -->
+  <section class="panel" id="p-patients" role="tabpanel">
+    <div class="panel-head">
+      <span class="k">12 — Triage &amp; follow-up</span>
+      <h2>Patient queue — register, triage, never lose a danger sign</h2>
+      <p>Register a walk-in or kiosk patient with their complaint. The system triages it (RED / AMBER / GREEN), returns the Telugu advice, and for RED or AMBER automatically raises a follow-up task so nobody falls through. No diagnosis, no dose — danger signs route straight to PHC staff.</p>
+    </div>
+    <div class="grid g-1-1-form">
+      <div class="card tint">
+        <h3>Register a patient</h3>
+        <div class="field"><label>Complaint (English or Telugu)</label><textarea class="ta" id="pComplaint" placeholder="e.g. pregnant, severe headache and swelling since morning"></textarea></div>
+        <div class="row">
+          <div class="field"><label>District</label><select class="select" id="pDistrict"></select></div>
+          <div class="field"><label>Duration (days)</label><input class="input" id="pDuration" type="number" value="1" min="0"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Age group</label><select class="select" id="pAge"><option>child</option><option selected>adult</option><option>elderly</option><option>pregnant</option></select></div>
+          <div class="field"><label>Gender</label><select class="select" id="pGender"><option>—</option><option>female</option><option>male</option></select></div>
+        </div>
+        <button class="btn primary" id="pMake">Register &amp; triage</button>
+        <div class="cls" id="pResult" style="margin-top:14px">
+          <div class="cls-top"><span class="risk-name" id="pToken">—</span><span class="tg" id="pLevel">—</span><span class="dom" id="pDom">—</span></div>
+          <div class="cls-body">
+            <div class="te" id="pAdvice">—</div>
+            <div class="cls-msgr">Route: <b id="pRoute">—</b></div>
+            <button class="btn sm" id="pWhats" style="margin-top:12px">Send advice on WhatsApp</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Queue <span class="hint" id="pCount">—</span></h3>
+        <div class="tbl-wrap" style="max-height:460px">
+          <table><thead><tr><th>Token</th><th>Level</th><th>Complaint</th><th></th></tr></thead>
+          <tbody id="pTable"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= API CONSOLE ================= -->
+  <section class="console">
+    <div class="console-bar">
+      <span class="lbl">Engine API</span>
+      <select class="select" id="apiMethod"><option>GET</option><option>POST</option></select>
+      <input class="input" id="apiRoute" value="/overview" spellcheck="false">
+      <button class="btn sm" id="apiSend">Send</button>
+      <div class="console-side">
+        <button class="btn sm" id="apiReset">Reset data</button>
+        <button class="btn sm" id="apiExport">Export JSON</button>
+      </div>
+    </div>
+    <pre class="console-out" id="apiOut">// Try: GET /signals · POST /forecast · POST /loop/run
+// This is the same engine the whole page runs on.</pre>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="foot">
+    <span class="disclaimer"><i class="d"></i>Illustrative demonstration on real district populations with synthetic risk and effectiveness assumptions — not a validated forecast.</span>
+    <span>Runs fully offline · data persists in this browser · production swaps the store for Supabase with no UI change.</span>
+  </footer>
+
+</main>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="data.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+<script>
+/* PWA: offline install. Service workers need https or localhost; they no-op on file:// */
+(function () {
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+  }
+  var deferred = null, btn = document.getElementById("installBtn");
+  window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferred = e; if (btn) btn.style.display = "inline-block"; });
+  if (btn) btn.addEventListener("click", function () { if (!deferred) return; deferred.prompt(); deferred.userChoice.finally(function () { deferred = null; btn.style.display = "none"; }); });
+  window.addEventListener("appinstalled", function () { if (btn) btn.style.display = "none"; });
+})();
+</script>
+</body>
+</html>
