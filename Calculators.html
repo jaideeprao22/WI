@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telangana Nethra — Public Health Calculators</title>
+<style>
+:root{
+  --bg:#f4f6f7; --card:#ffffff; --ink:#0f2e2a; --muted:#5b6b68; --line:#e1e7e6;
+  --teal:#0f766e; --teal-d:#115e59; --teal-l:#e6f3f1;
+  --good:#15803d; --good-l:#eaf6ee; --bad:#b91c1c; --bad-l:#fbecec;
+  --ok:#b45309; --ok-l:#fef3e2; --info:#0f766e; --info-l:#e6f3f1;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 64px}
+header{background:linear-gradient(135deg,var(--teal-d),var(--teal));color:#fff;padding:24px 16px}
+header .h{max-width:1180px;margin:0 auto}
+header h1{margin:0;font-size:22px;letter-spacing:.2px}
+header .te{font-size:15px;opacity:.92;font-weight:600}
+header p{margin:7px 0 0;opacity:.92;font-size:13.5px;max-width:780px}
+.chiprow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:10px}
+.chiprow .chips{margin-top:0}
+.seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px;gap:3px;flex:none}
+.seg button{border:0;background:transparent;color:var(--muted);font:inherit;font-size:12.5px;font-weight:700;
+  padding:6px 15px;border-radius:999px;cursor:pointer}
+.seg button.on{background:var(--teal);color:#fff}
+.controls{position:sticky;top:0;z-index:5;background:var(--bg);padding:14px 0 8px;border-bottom:1px solid var(--line)}
+#search{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:10px;font-size:15px;background:#fff}
+#search:focus{outline:none;border-color:var(--teal)}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.chip{padding:6px 11px;border:1px solid var(--line);background:#fff;border-radius:999px;font-size:12.5px;
+  color:var(--muted);cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.sec{margin-top:26px}
+.sec h2{font-size:15px;color:var(--teal-d);margin:0 0 2px}
+.sec .secd{font-size:12.5px;color:var(--muted);margin:0 0 12px;padding-bottom:8px;border-bottom:2px solid var(--teal-l)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;
+  box-shadow:0 1px 2px rgba(15,46,42,.04);display:flex;flex-direction:column}
+.cn{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card h3{margin:0;font-size:16.5px;font-weight:700}
+.tag{font-size:11px;color:var(--muted);background:#f0f4f3;border:1px solid var(--line);
+  border-radius:6px;padding:2px 7px;white-space:nowrap}
+.q{color:var(--muted);font-size:13px;margin:5px 0 13px}
+.fld{display:block;margin-bottom:9px}
+.fld>span{display:block;font-size:12.5px;color:var(--muted);margin-bottom:3px}
+.fld em{font-style:normal;color:#94a3a0;font-size:11.5px}
+.fld input,.fld select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;
+  font-size:14px;background:#fff;font-variant-numeric:tabular-nums}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--teal)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.out{margin-top:13px}
+.verdict{font-size:15px;line-height:1.45;border-radius:10px;padding:12px 14px;border-left:5px solid}
+.verdict b{font-weight:700}
+.v-good{background:var(--good-l);border-color:var(--good);color:#1c5732}
+.v-bad{background:var(--bad-l);border-color:var(--bad);color:#8a2020}
+.v-ok{background:var(--ok-l);border-color:var(--ok);color:#7a4209}
+.v-info{background:var(--info-l);border-color:var(--info);color:#14554f}
+.nums{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.num{font-size:12px;color:var(--muted);background:#fafbfb;border:1px solid var(--line);
+  border-radius:8px;padding:5px 9px;font-variant-numeric:tabular-nums}
+.num b{color:var(--ink);font-weight:700;font-size:13px;margin-right:3px}
+.num.key{background:var(--teal-l);border-color:#cfe7e3}
+.num.key b{color:var(--teal-d)}
+.more{margin-top:12px;border-top:1px dashed var(--line);padding-top:9px}
+.more summary{cursor:pointer;font-size:12.5px;color:var(--teal-d);font-weight:600;list-style:none}
+.more summary::-webkit-details-marker{display:none}
+.more summary:before{content:"▸ ";font-size:11px}
+.more[open] summary:before{content:"▾ "}
+.fbody{margin-top:8px;background:#fbfaf6;border:1px dashed #e4ddc9;border-radius:8px;padding:9px 11px;
+  font-size:12px;color:#6b5e3a;font-family:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;line-height:1.55}
+.fbody b{color:#b45309;font-weight:700;margin-right:4px}
+.fbody .m{display:block;margin-top:7px;font-family:inherit;color:var(--muted);font-size:11.5px}
+.empty{text-align:center;color:var(--muted);padding:40px 0}
+footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.ex{background:#f7faf9;border:1px solid var(--line);border-left:3px solid var(--teal);
+  border-radius:0 8px 8px 0;padding:8px 11px;font-size:12.5px;color:#3f5a55;margin:0 0 13px;line-height:1.45}
+.ex b{color:var(--teal-d);font-weight:700}
+/* default = Normal view: hide technical tags + formulas; show only in Scientific (body.sci) */
+.tag{display:none}
+.more{display:none}
+body.sci .tag{display:inline-block}
+body.sci .more{display:block}
+@media(max-width:560px){.cards{grid-template-columns:1fr}.two{grid-template-columns:1fr 1fr}}
+/* ===== unified global navigation (identical on every page) ===== */
+.gnav{position:sticky;top:0;z-index:200;background:#0A1416;border-bottom:1px solid #1A3138;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.gnav *{box-sizing:border-box}
+.gnav-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;height:60px;padding:0 18px}
+.gnav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex:none}
+.gnav-seal{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#0A1416;background:linear-gradient(135deg,#36D6C2,#1fa896);font-size:15px;flex:none}
+.gnav-wm{display:flex;flex-direction:column;line-height:1.18}
+.gnav-wm b{color:#E8F1F2;font-size:13.5px;letter-spacing:.2px;font-weight:700}
+.gnav-wm>span{color:#88A2AA;font-size:10px}
+.gnav-links{display:flex;align-items:center;gap:2px;margin-left:8px;overflow-x:auto;scrollbar-width:none}
+.gnav-links::-webkit-scrollbar{display:none}
+.gnav-link{display:flex;flex-direction:column;text-decoration:none;padding:7px 12px;border-radius:9px;white-space:nowrap;line-height:1.2;border:1px solid transparent}
+.gnav-link b{color:#C2D2D5;font-size:13px;font-weight:600}
+.gnav-link>span{color:#5C757D;font-size:10px}
+.gnav-link:hover{background:#11242a}
+.gnav-link:hover b{color:#E8F1F2}
+.gnav-link.on{background:#11242a;border-color:#234047}
+.gnav-link.on b{color:#36D6C2}
+.gnav-search{margin-left:auto;display:flex;align-items:center;gap:7px;flex:none;text-decoration:none;background:#0F1E22;border:1px solid #234047;color:#88A2AA;font-size:12.5px;font-weight:600;padding:8px 12px;border-radius:9px;white-space:nowrap}
+.gnav-search:hover{border-color:#36D6C2;color:#E8F1F2}
+.gnav-search kbd{background:#0A1416;border:1px solid #234047;border-radius:5px;padding:1px 5px;font-size:10.5px;color:#88A2AA;font-family:inherit}
+@media(max-width:860px){.gnav-wm,.gnav-link>span,.gnav-search>span{display:none}}
+</style>
+</head>
+<body>
+<nav class="gnav"><div class="gnav-in">
+  <a class="gnav-brand" href="Home.html" title="Home">
+    <span class="gnav-seal">నే</span>
+    <span class="gnav-wm"><b>Telangana Nethra</b><span>Public Health Intelligence</span></span>
+  </a>
+  <div class="gnav-links">
+    <a class="gnav-link" href="Home.html"><b>Home</b><span>Overview</span></a>
+    <a class="gnav-link" href="index.html"><b>Console</b><span>The workspace</span></a>
+    <a class="gnav-link" href="ControlRoom.html"><b>Control Room</b><span>Emergency dashboard</span></a>
+    <a class="gnav-link on" href="Calculators.html"><b>Calculators</b><span>Field tools &amp; R₀</span></a>
+    <a class="gnav-link" href="Sitemap.html"><b>Sitemap</b><span>Everything in one place</span></a>
+  </div>
+  <a class="gnav-search" href="index.html#search">⌕ <span>Search modules</span> <kbd>⌘K</kbd></a>
+</div></nav>
+<header><div class="h">
+  <h1>Telangana Nethra — Public Health Calculators <span class="te">ఆరోగ్యం</span></h1>
+  <p>Type any value — the plain-language answer updates instantly. Every result is written in everyday words first. For planning &amp; screening, not a clinical diagnosis.</p>
+</div></header>
+
+<div class="wrap">
+  <div class="controls">
+    <input id="search" type="text" placeholder="Search (e.g. cost per life, infant deaths, vaccine, how many to survey, BMI)…">
+    <div class="chiprow">
+      <div class="seg" id="seg">
+        <button class="on" data-mode="normal">Normal</button>
+        <button data-mode="sci">Scientific</button>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+  </div>
+  <div id="app"></div>
+  <footer id="foot"></footer>
+</div>
+
+<script>
+/* ---------- helpers ---------- */
+function num(x){var f=parseFloat(x);return isFinite(f)?f:NaN;}
+function fmt(x,d){if(!isFinite(x))return '—';d=(d===undefined)?2:d;var m=Math.pow(10,d);
+  return (Math.round(x*m)/m).toString();}
+function ceil(x){return isFinite(x)?Math.ceil(x):'—';}
+function list(s){return (s||'').split(/[,\s]+/).map(parseFloat).filter(function(x){return isFinite(x);});}
+function inr(x){ if(!isFinite(x))return '—'; var neg=x<0; x=Math.abs(x);
+  var s=Math.round(x).toString(); var l3=s.slice(-3), rest=s.slice(0,-3);
+  if(rest)l3=','+l3; rest=rest.replace(/\B(?=(\d{2})+(?!\d))/g,','); return (neg?'−':'')+'₹'+rest+l3; }
+function inrW(x){ if(!isFinite(x))return '—'; var neg=x<0; x=Math.abs(x); var s;
+  if(x>=1e7)s='₹'+fmt(x/1e7,2)+' crore'; else if(x>=1e5)s='₹'+fmt(x/1e5,2)+' lakh'; else s=inr(x);
+  return (neg?'−':'')+s; }
+var SING={"cases prevented":"case","deaths averted":"death","life-years gained":"life-year",
+  "DALYs averted":"DALY","disability days averted":"disability day"};
+function sing(u){return SING[u]||u;}
+var Z={"90":1.645,"95":1.96,"99":2.576}, ZB={"80":0.8416,"90":1.2816};
+var CONF=[{v:"90",label:"90%"},{v:"95",label:"95%"},{v:"99",label:"99%"}];
+var POW=[{v:"80",label:"80%"},{v:"90",label:"90%"}];
+var EFFU=[{v:"cases prevented",label:"cases prevented"},{v:"deaths averted",label:"deaths averted"},
+  {v:"life-years gained",label:"life-years gained"},{v:"DALYs averted",label:"DALYs averted"},
+  {v:"disability days averted",label:"disability days averted"}];
+
+/* ---------- category meta (plain titles + descriptions) ---------- */
+var CATMETA={
+ "Health Economics":{t:"Money &amp; Value for Money",d:"Is a programme worth the spend? What does each life or healthy year cost?"},
+ "Disease Burden":{t:"Burden of Disease",d:"How much healthy life a disease takes from the community."},
+ "Epidemiology — Frequency":{t:"How Common a Disease Is",d:"New cases, existing cases, outbreaks, and death/birth rates."},
+ "Epidemiology — Risk &amp; Association":{t:"What Raises the Risk",d:"Links between an exposure and a disease."},
+ "Screening / Diagnostic Tests":{t:"How Good a Test Is",d:"Whether a screening test catches disease and clears the healthy."},
+ "Vital Statistics &amp; Demography":{t:"Births, Deaths &amp; Population",d:"Mortality, fertility, and population structure."},
+ "Communicable Disease &amp; Immunization":{t:"Infections &amp; Vaccines",d:"Vaccine effect and the immunity needed to stop spread."},
+ "Nutrition &amp; Anthropometry":{t:"Body Size &amp; Nutrition",d:"BMI and body measurements, using India cut-offs."},
+ "Biostatistics &amp; Sample Size":{t:"Planning a Survey",d:"How many people you need to study."},
+ "Family Planning":{t:"Family Planning",d:"Contraceptive effectiveness and coverage."}
+};
+
+/* ---------- calculators (arithmetic verified; output in plain words) ---------- */
+var CALCS=[
+/* ===== HEALTH ECONOMICS ===== */
+{id:"cba",cat:"Health Economics",plain:"Is it worth the money?",tag:"BCR",
+ q:"For every rupee we spend, how many rupees of benefit come back?",
+ ex:"A district spends ₹20 lakh on a dengue-control drive; it prevents hospital bills and lost workdays worth ₹50 lakh. Was it worth it?",
+ inputs:[{key:"b",label:"Total benefits (in money)",unit:"₹",default:5000000},{key:"c",label:"Total costs",unit:"₹",default:2000000}],
+ formula:"Benefit–Cost Ratio = Total benefits ÷ Total costs ;  Net benefit = Benefits − Costs",
+ compute:function(v){var b=num(v.b),c=num(v.c),bcr=b/c,net=b-c;
+   var lv=bcr>1?"good":bcr<1?"bad":"ok";
+   var t="Every ₹1 spent returns <b>₹"+fmt(bcr,2)+"</b>. "+(bcr>1?"Worth doing — it brings in more than it costs (net gain "+inrW(net)+").":bcr<1?"Not worth it on these numbers — it returns less than the ₹1 spent (net loss "+inrW(-net)+").":"It only breaks even.");
+   return{verdict:{t:t,lv:lv},results:[{label:"return per ₹1",value:"₹"+fmt(bcr,2),key:true},{label:"net benefit",value:inr(net)}]};}},
+
+{id:"npv",cat:"Health Economics",plain:"Worth it over many years?",tag:"NPV",
+ q:"Counting that money is worth less in future years, does it still pay back?",
+ ex:"A piped-water scheme costs ₹20 lakh to build now, then ₹1 lakh a year to run, and saves ₹10 lakh a year in diarrhoea treatment. Does it pay back over 4 years?",
+ inputs:[{key:"b",label:"Benefits each year (year 0 first, comma-separated)",type:"text",default:"0,1000000,1000000,1000000"},
+   {key:"c",label:"Costs each year (comma-separated)",type:"text",default:"2000000,100000,100000,100000"},
+   {key:"r",label:"Discount rate",unit:"%",default:5}],
+ formula:"NPV = Σ (Bₜ − Cₜ)/(1+r)ᵗ ;  discounted BCR = ΣBₜ/(1+r)ᵗ ÷ ΣCₜ/(1+r)ᵗ   (t = year, starts 0)",
+ method:"Future rupees are 'discounted' because money now is worth more than money later.",
+ compute:function(v){var bA=list(v.b),cA=list(v.c),rr=num(v.r)/100,L=Math.max(bA.length,cA.length),dB=0,dC=0,t;
+   for(t=0;t<L;t++){var f=Math.pow(1+rr,t);dB+=(bA[t]||0)/f;dC+=(cA[t]||0)/f;}
+   var bcr=dB/dC,npv=dB-dC,lv=npv>0?"good":npv<0?"bad":"ok";
+   var tx=npv>0?"Even after counting that future money is worth less today, the programme still creates <b>"+inrW(npv)+"</b> of net value — a sound investment.":npv<0?"After discounting, the programme loses <b>"+inrW(-npv)+"</b> — it does not pay back.":"It breaks even in today's money.";
+   return{verdict:{t:tx,lv:lv},results:[{label:"net present value",value:inr(npv),key:true},{label:"discounted benefits",value:inr(dB)},{label:"discounted costs",value:inr(dC)},{label:"discounted BCR",value:fmt(bcr,2)}]};}},
+
+{id:"cea",cat:"Health Economics",plain:"Cost per result",tag:"CEA",
+ q:"How much does it cost to prevent one case or save one life?",
+ ex:"A ₹10 lakh measles camp prevents 200 cases — what does preventing each case cost?",
+ inputs:[{key:"c",label:"Total cost",unit:"₹",default:1000000},{key:"n",label:"Number of results achieved",default:200},
+   {key:"u",label:"What is the result?",type:"select",options:EFFU,default:"cases prevented"}],
+ formula:"Cost-effectiveness = Total cost ÷ Number of health results",
+ compute:function(v){var c=num(v.c),n=num(v.n),cpe=c/n;
+   return{verdict:{t:"It costs about <b>"+inrW(cpe)+"</b> for each "+sing(v.u)+". The lower this is, the better the value — compare it against other programmes.",lv:"info"},
+     results:[{label:"per "+sing(v.u),value:inr(cpe),key:true}]};}},
+
+{id:"icer",cat:"Health Economics",plain:"Cost of switching to a better option",tag:"ICER",
+ q:"If we move to a better programme, what does each extra healthy result cost?",
+ ex:"Switching from the old TB regimen (₹1 lakh, 10 life-years) to a newer one (₹1.5 lakh, 12 life-years) — what does each extra life-year cost?",
+ inputs:[{key:"cn",label:"New programme — total cost",unit:"₹",default:150000},{key:"cc",label:"Current programme — total cost",unit:"₹",default:100000},
+   {key:"en",label:"Health gained — new",default:12},{key:"ec",label:"Health gained — current",default:10},
+   {key:"u",label:"What we measure",type:"select",options:EFFU,default:"life-years gained"}],
+ formula:"ICER = (Costₙₑw − Cost𝒸ₒₘₚ) ÷ (Effectₙₑw − Effect𝒸ₒₘₚ) = extra cost ÷ extra effect",
+ method:"A common yardstick is India's income per person (~₹2 lakh): a cost below this is widely seen as good value.",
+ compute:function(v){var dC=num(v.cn)-num(v.cc),dE=num(v.en)-num(v.ec),icer=dC/dE,lv,t;
+   if(dC<0&&dE>0){lv="good";t="The new programme is <b>both cheaper and more effective</b> — adopt it: it saves money and improves health.";}
+   else if(dC>0&&dE<0){lv="bad";t="The new programme <b>costs more and works worse</b> — reject it.";}
+   else if(dE===0){lv="ok";t="Both options give the same health result — decide on cost alone.";}
+   else{lv="info";t="Gaining one more "+sing(v.u)+" costs <b>"+inrW(icer)+"</b> extra. It is good value if that is below what we are willing to pay (a common yardstick is India's income per person, ~₹2 lakh).";}
+   return{verdict:{t:t,lv:lv},results:[{label:"cost per extra "+sing(v.u),value:inr(icer),key:true},{label:"extra cost",value:inr(dC)},{label:"extra "+sing(v.u)+"s",value:fmt(dE,2)}]};}},
+
+{id:"cua",cat:"Health Economics",plain:"Cost per healthy year",tag:"CUA · ₹/QALY",
+ q:"How much does the programme cost for each extra year of healthy life?",
+ ex:"A ₹5 lakh hypertension-screening drive adds 10 healthy years of life — is it good value against a ₹2 lakh limit?",
+ inputs:[{key:"c",label:"Extra cost of the new programme",unit:"₹",default:500000},{key:"q",label:"Extra healthy years gained",default:10},
+   {key:"t",label:"Most you'd pay per healthy year (optional)",unit:"₹",default:200000}],
+ formula:"Cost-utility = Extra cost ÷ Healthy years gained (QALYs)",
+ compute:function(v){var c=num(v.c),q=num(v.q),cpq=c/q,t=num(v.t),lv,tx;
+   if(isFinite(t)){lv=cpq<=t?"good":"bad";tx="Each extra healthy year costs <b>"+inrW(cpq)+"</b>. That is "+(cpq<=t?"below":"above")+" your "+inrW(t)+" limit, so it is "+(cpq<=t?"good value.":"not good value at that limit.");}
+   else{lv="info";tx="Each extra healthy year costs <b>"+inrW(cpq)+"</b>. Many systems treat this as good value if it is under roughly one year's income per person (~₹2 lakh in India).";}
+   return{verdict:{t:tx,lv:lv},results:[{label:"per healthy year",value:inr(cpq),key:true}]};}},
+
+{id:"qaly",cat:"Health Economics",plain:"Healthy years gained",tag:"QALY",
+ q:"How many years of healthy life does this add?",
+ ex:"A patient lives 10 more years on dialysis but at 80% of full health — how many quality-adjusted years is that?",
+ inputs:[{key:"y",label:"Years of life",default:10},{key:"u",label:"Quality of that health (0 = death, 1 = perfect)",default:0.8,step:"0.01"}],
+ formula:"QALY = Years of life × Quality weight   (0 = death, 1 = perfect health)",
+ compute:function(v){var q=num(v.y)*num(v.u);
+   return{verdict:{t:"This adds <b>"+fmt(q,2)+"</b> healthy life-years (one year in perfect health counts as 1.0).",lv:"info"},results:[{label:"healthy years",value:fmt(q,2),key:true}]};}},
+
+{id:"cma",cat:"Health Economics",plain:"Cheapest of equal options",tag:"CMA",
+ q:"When two options work equally well, which costs less?",
+ ex:"Two ORS brands work equally well — one costs ₹80,000, the other ₹65,000. Which to buy?",
+ inputs:[{key:"a",label:"Cost — option A",unit:"₹",default:80000},{key:"b",label:"Cost — option B",unit:"₹",default:65000}],
+ formula:"Cost-minimization: outcomes assumed equal → choose the lower cost. (Only valid if effectiveness is proven equal.)",
+ compute:function(v){var a=num(v.a),b=num(v.b),lo=Math.min(a,b),save=Math.abs(a-b);
+   var tx=a===b?"Both options cost the same.":"Both give the same health result, so pick the cheaper one — <b>"+(a<b?"Option A":"Option B")+"</b> — and save "+inrW(save)+".";
+   return{verdict:{t:tx,lv:a===b?"ok":"good"},results:[{label:"cheaper cost",value:inr(lo),key:true},{label:"saving",value:inr(save)}]};}},
+
+{id:"pv",cat:"Health Economics",plain:"Today's value of future money",tag:"Present Value",
+ q:"What is a future amount of money worth in today's rupees?",
+ ex:"A donor promises ₹10 lakh for a health centre in 10 years — what is that worth today?",
+ inputs:[{key:"fv",label:"Future amount",unit:"₹",default:1000000},{key:"r",label:"Discount rate",unit:"%",default:5},{key:"n",label:"Years from now",default:10}],
+ formula:"Present Value = Future value ÷ (1 + r)ⁿ",
+ compute:function(v){var pv=num(v.fv)/Math.pow(1+num(v.r)/100,num(v.n));
+   return{verdict:{t:"<b>"+inrW(num(v.fv))+"</b> received "+v.n+" years from now is worth only <b>"+inrW(pv)+"</b> in today's money.",lv:"info"},results:[{label:"value today",value:inr(pv),key:true}]};}},
+
+/* ===== DISEASE BURDEN ===== */
+{id:"daly",cat:"Disease Burden",plain:"Healthy years lost to a disease",tag:"DALY",
+ q:"How many years of healthy life does this disease take from the community?",
+ ex:"In a block, accidents kill 50 young adults (≈30 years lost each) and leave 200 disabled for ~5 years — how many healthy years are lost?",
+ inputs:[{key:"d",label:"Number of deaths",default:50},{key:"le",label:"Years of life lost per death",default:30},
+   {key:"n",label:"Number of people living with it",default:200},{key:"dw",label:"Severity (0 = none, 1 = worst)",default:0.2,step:"0.01"},{key:"dur",label:"Average years they live with it",default:5}],
+ formula:"DALY = YLL + YLD ;  YLL = deaths × years lost ;  YLD = cases × severity × years",
+ compute:function(v){var yll=num(v.d)*num(v.le),yld=num(v.n)*num(v.dw)*num(v.dur),daly=yll+yld;
+   return{verdict:{t:"This disease costs the community about <b>"+fmt(daly,0)+" healthy years of life</b> — "+fmt(yll,0)+" lost to early death and "+fmt(yld,0)+" to living with illness. Higher means a bigger burden to tackle.",lv:"info"},
+     results:[{label:"healthy years lost",value:fmt(daly,0),key:true},{label:"from early death",value:fmt(yll,0)},{label:"from illness",value:fmt(yld,0)}]};}},
+
+{id:"smr",cat:"Disease Burden",plain:"More or fewer deaths than expected?",tag:"SMR",
+ q:"Are deaths here higher or lower than expected for this age group?",
+ ex:"A factory town records 120 deaths when 100 were expected for its age mix — are deaths unusually high?",
+ inputs:[{key:"o",label:"Deaths actually seen",default:120},{key:"e",label:"Deaths expected for this age profile",default:100}],
+ formula:"SMR = (Observed deaths ÷ Expected deaths) × 100",
+ compute:function(v){var smr=num(v.o)/num(v.e)*100,lv=smr>100?"bad":smr<100?"good":"ok";
+   var tx=smr>100?"Deaths here are about <b>"+fmt(smr-100,0)+"% higher</b> than expected for this age profile — a red flag worth investigating.":smr<100?"Deaths here are about <b>"+fmt(100-smr,0)+"% lower</b> than expected for this age profile — better than average.":"Deaths are exactly as expected.";
+   return{verdict:{t:tx,lv:lv},results:[{label:"SMR",value:fmt(smr,1),key:true}]};}},
+
+/* ===== EPIDEMIOLOGY — FREQUENCY ===== */
+{id:"cuminc",cat:"Epidemiology — Frequency",plain:"Risk of getting the disease",tag:"Cumulative incidence",
+ q:"What share of people developed the disease over this period?",
+ ex:"1,000 schoolchildren are followed for a year; 30 get dengue — what is the risk of getting it?",
+ inputs:[{key:"c",label:"New cases",default:30},{key:"p",label:"People at risk (at start)",default:1000},
+   {key:"per",label:"Show per",type:"select",options:[{v:100,label:"100"},{v:1000,label:"1,000"},{v:100000,label:"100,000"}],default:1000}],
+ formula:"Cumulative incidence = New cases ÷ People at risk × per N",
+ compute:function(v){var x=num(v.c)/num(v.p)*num(v.per);
+   return{verdict:{t:"About <b>"+fmt(x,1)+" in every "+(+v.per).toLocaleString()+"</b> people developed the condition during this period.",lv:"info"},results:[{label:"per "+(+v.per).toLocaleString(),value:fmt(x,2),key:true}]};}},
+
+{id:"incdens",cat:"Epidemiology — Frequency",plain:"New-case rate over time",tag:"Incidence rate",
+ q:"How fast are new cases appearing, counting time at risk?",
+ ex:"1,000 workers followed over time add up to 4,500 person-years; 30 develop silicosis — how fast are new cases appearing?",
+ inputs:[{key:"c",label:"New cases",default:30},{key:"pt",label:"Total person-time",unit:"person-years",default:4500},
+   {key:"per",label:"Show per",type:"select",options:[{v:1000,label:"1,000"},{v:100000,label:"100,000"}],default:1000}],
+ formula:"Incidence rate = New cases ÷ Total person-time × per N",
+ method:"Person-years = number of people × years each is followed.",
+ compute:function(v){var x=num(v.c)/num(v.pt)*num(v.per);
+   return{verdict:{t:"About <b>"+fmt(x,2)+"</b> new cases occurred for every "+(+v.per).toLocaleString()+" person-years observed.",lv:"info"},results:[{label:"per "+(+v.per).toLocaleString()+" p-yr",value:fmt(x,3),key:true}]};}},
+
+{id:"prev",cat:"Epidemiology — Frequency",plain:"How many have it right now",tag:"Point prevalence",
+ q:"What share of people have the condition at this moment?",
+ ex:"A survey of 1,000 people finds 80 currently have diabetes — how common is it right now?",
+ inputs:[{key:"c",label:"People who have it now",default:80},{key:"p",label:"Total population",default:1000},
+   {key:"per",label:"Show per",type:"select",options:[{v:100,label:"100"},{v:1000,label:"1,000"},{v:100000,label:"100,000"}],default:1000}],
+ formula:"Point prevalence = Existing cases ÷ Total population × per N",
+ compute:function(v){var x=num(v.c)/num(v.p)*num(v.per);
+   return{verdict:{t:"Right now, about <b>"+fmt(x,1)+" in every "+(+v.per).toLocaleString()+"</b> people have this condition.",lv:"info"},results:[{label:"per "+(+v.per).toLocaleString(),value:fmt(x,2),key:true}]};}},
+
+{id:"ar",cat:"Epidemiology — Frequency",plain:"Outbreak attack rate",tag:"Attack rate",
+ q:"What share of exposed people fell ill in this outbreak?",
+ ex:"150 people ate at a wedding and 45 got food poisoning — what share fell ill?",
+ inputs:[{key:"c",label:"People who fell ill",default:45},{key:"p",label:"People exposed / at risk",default:150}],
+ formula:"Attack rate (%) = Cases ÷ People at risk × 100",
+ compute:function(v){var x=num(v.c)/num(v.p)*100;
+   return{verdict:{t:"<b>"+fmt(x,1)+"%</b> of exposed people fell ill — this is the outbreak's attack rate.",lv:"info"},results:[{label:"attack rate",value:fmt(x,1)+"%",key:true}]};}},
+
+{id:"sar",cat:"Epidemiology — Frequency",plain:"How fast it spreads to contacts",tag:"Secondary attack rate",
+ q:"What share of close contacts caught it from the first cases?",
+ ex:"One COVID case lives with 60 contacts; 12 catch it — how easily does it spread?",
+ inputs:[{key:"c",label:"Contacts who fell ill",default:12},{key:"n",label:"Close contacts at risk",default:60}],
+ formula:"Secondary attack rate (%) = New cases in contacts ÷ Susceptible contacts × 100  (exclude the first cases)",
+ compute:function(v){var x=num(v.c)/num(v.n)*100;
+   return{verdict:{t:"<b>"+fmt(x,1)+"%</b> of close contacts caught it from the first cases — the higher it is, the more easily the disease spreads.",lv:"info"},results:[{label:"secondary attack rate",value:fmt(x,1)+"%",key:true}]};}},
+
+{id:"cfr",cat:"Epidemiology — Frequency",plain:"How deadly the disease is",tag:"CFR",
+ q:"What share of diagnosed patients died?",
+ ex:"Of 200 people diagnosed in a fever outbreak, 8 die — how deadly is it?",
+ inputs:[{key:"d",label:"Deaths from the disease",default:8},{key:"c",label:"Total diagnosed patients",default:200}],
+ formula:"Case Fatality Rate (%) = Deaths from disease ÷ Total cases × 100",
+ compute:function(v){var x=num(v.d)/num(v.c)*100;
+   return{verdict:{t:"Of every 100 diagnosed patients, about <b>"+fmt(x,1)+"</b> died — a measure of how deadly the disease is.",lv:"info"},results:[{label:"case fatality rate",value:fmt(x,2)+"%",key:true}]};}},
+
+{id:"cdr",cat:"Epidemiology — Frequency",plain:"Death rate",tag:"Crude death rate",
+ q:"How many people die per 1,000 each year?",
+ ex:"A town of 1,00,000 records 850 deaths in a year — what is the death rate?",
+ inputs:[{key:"d",label:"Deaths in a year",default:850},{key:"p",label:"Mid-year population",default:100000}],
+ formula:"Crude death rate = Deaths in a year ÷ Mid-year population × 1000",
+ compute:function(v){var x=num(v.d)/num(v.p)*1000;
+   return{verdict:{t:"About <b>"+fmt(x,1)+" people per 1,000</b> die each year in this population.",lv:"info"},results:[{label:"per 1,000/yr",value:fmt(x,2),key:true}]};}},
+
+{id:"cbr",cat:"Epidemiology — Frequency",plain:"Birth rate",tag:"Crude birth rate",
+ q:"How many babies are born per 1,000 people each year?",
+ ex:"The same town of 1,00,000 has 1,800 births in a year — what is the birth rate?",
+ inputs:[{key:"b",label:"Live births in a year",default:1800},{key:"p",label:"Mid-year population",default:100000}],
+ formula:"Crude birth rate = Live births in a year ÷ Mid-year population × 1000",
+ compute:function(v){var x=num(v.b)/num(v.p)*1000;
+   return{verdict:{t:"About <b>"+fmt(x,1)+" babies per 1,000</b> people are born each year.",lv:"info"},results:[{label:"per 1,000/yr",value:fmt(x,2),key:true}]};}},
+
+/* ===== EPIDEMIOLOGY — RISK & ASSOCIATION ===== */
+{id:"cohort",cat:"Epidemiology — Risk &amp; Association",plain:"Does the exposure raise risk?",tag:"RR · OR · NNT",
+ q:"Are exposed people more likely to get the disease, and how many must we protect to prevent one case?",
+ ex:"Follow 1,000 tobacco users and 1,000 non-users; 90 vs 30 develop oral cancer — does tobacco raise risk, and how many should quit to prevent one cancer?",
+ inputs:[{key:"a",label:"Exposed — got disease",default:90},{key:"b",label:"Exposed — stayed well",default:910},
+   {key:"c",label:"Not exposed — got disease",default:30},{key:"d",label:"Not exposed — stayed well",default:970}],
+ formula:"RR = [a/(a+b)] ÷ [c/(c+d)]   AR% = (Rₑ−Rᵤ)/Rₑ×100   PAR% = (Rₚₒₚ−Rᵤ)/Rₚₒₚ×100   NNT = 1/|Rₑ−Rᵤ|",
+ method:"RR above 1 means the exposure raises risk; below 1 means it protects. NNT rounds up.",
+ compute:function(v){var a=num(v.a),b=num(v.b),c=num(v.c),d=num(v.d);
+   var Re=a/(a+b),Ru=c/(c+d),RR=Re/Ru,OR=(a*d)/(b*c),AR=Re-Ru,ARp=(Re-Ru)/Re*100;
+   var Ip=(a+c)/(a+b+c+d),PARp=(Ip-Ru)/Ip*100,NNT=1/Math.abs(Re-Ru);
+   var lv=RR>1?"bad":RR<1?"good":"ok";
+   var tx="Exposed people are <b>"+fmt(RR,2)+" times</b> as likely to get the disease. "+(RR>1?"The exposure raises risk — protecting about "+ceil(NNT)+" people would prevent one case.":RR<1?"The exposure looks protective.":"No clear effect.");
+   return{verdict:{t:tx,lv:lv},results:[{label:"relative risk",value:fmt(RR,2),key:true},{label:"odds ratio",value:fmt(OR,2)},
+     {label:"risk if exposed",value:fmt(Re*100,1)+"%"},{label:"risk if not",value:fmt(Ru*100,1)+"%"},
+     {label:"attributable risk %",value:fmt(ARp,1)+"%"},{label:"population AR %",value:fmt(PARp,1)+"%"},{label:"protect to prevent 1",value:ceil(NNT)}]};}},
+
+{id:"or",cat:"Epidemiology — Risk &amp; Association",plain:"Is the exposure linked to disease?",tag:"Odds Ratio",
+ q:"Did patients have the exposure more often than healthy people?",
+ ex:"Among oral-cancer patients vs healthy people, more patients had used tobacco — is tobacco linked to the disease?",
+ inputs:[{key:"a",label:"Patients (cases) — exposed",default:60},{key:"b",label:"Healthy (controls) — exposed",default:40},
+   {key:"c",label:"Patients (cases) — not exposed",default:30},{key:"d",label:"Healthy (controls) — not exposed",default:70}],
+ formula:"Odds Ratio = (a × d) ÷ (b × c)",
+ method:"Used for case-control studies, where true risk (RR) cannot be measured directly.",
+ compute:function(v){var OR=(num(v.a)*num(v.d))/(num(v.b)*num(v.c)),lv=OR>1?"bad":OR<1?"good":"ok";
+   var tx="People with the disease had <b>"+fmt(OR,2)+" times</b> the odds of the exposure. "+(OR>1?"This points to the exposure being linked to higher risk.":OR<1?"This points to the exposure being protective.":"No clear link.");
+   return{verdict:{t:tx,lv:lv},results:[{label:"odds ratio",value:fmt(OR,2),key:true}]};}},
+
+/* ===== SCREENING / DIAGNOSTIC ===== */
+{id:"screen",cat:"Screening / Diagnostic Tests",plain:"How good is the test?",tag:"Sensitivity · Specificity · PPV",
+ q:"Does this test catch real cases and correctly clear healthy people?",
+ ex:"A camp screens 500 people for diabetes with a finger-prick test and confirms with a lab — how well does the quick test catch real cases?",
+ inputs:[{key:"tp",label:"Test positive &amp; truly has disease",default:80},{key:"fp",label:"Test positive but healthy",default:20},
+   {key:"fn",label:"Test negative but truly has disease",default:10},{key:"tn",label:"Test negative &amp; truly healthy",default:390}],
+ formula:"Sensitivity=TP/(TP+FN) · Specificity=TN/(TN+FP) · PPV=TP/(TP+FP) · NPV=TN/(TN+FN) · LR+=Sens/(1−Spec) · LR−=(1−Sens)/Spec",
+ method:"PPV and NPV depend on how common the disease is in the group being tested.",
+ compute:function(v){var tp=num(v.tp),fp=num(v.fp),fn=num(v.fn),tn=num(v.tn),tot=tp+fp+fn+tn;
+   var sens=tp/(tp+fn),spec=tn/(tn+fp),ppv=tp/(tp+fp),npv=tn/(tn+fn),acc=(tp+tn)/tot;
+   var youd=sens+spec-1,lrp=sens/(1-spec),lrn=(1-sens)/spec,prev=(tp+fn)/tot;
+   return{verdict:{t:"This test correctly catches <b>"+fmt(sens*100,0)+"%</b> of people who truly have the disease, and correctly clears <b>"+fmt(spec*100,0)+"%</b> of healthy people. Of those who test positive, "+fmt(ppv*100,0)+"% truly have it.",lv:"info"},
+     results:[{label:"sensitivity",value:fmt(sens*100,1)+"%",key:true},{label:"specificity",value:fmt(spec*100,1)+"%",key:true},
+       {label:"PPV",value:fmt(ppv*100,1)+"%"},{label:"NPV",value:fmt(npv*100,1)+"%"},{label:"accuracy",value:fmt(acc*100,1)+"%"},
+       {label:"Youden",value:fmt(youd,2)},{label:"LR+",value:fmt(lrp,2)},{label:"LR−",value:fmt(lrn,2)},{label:"disease in sample",value:fmt(prev*100,1)+"%"}]};}},
+
+/* ===== VITAL STATISTICS & DEMOGRAPHY ===== */
+{id:"imr",cat:"Vital Statistics &amp; Demography",plain:"Infant deaths",tag:"IMR",
+ q:"How many babies die before their first birthday, per 1,000 born?",
+ ex:"A district has 28 infant deaths among 1,000 babies born — what is its infant mortality?",
+ inputs:[{key:"d",label:"Infant deaths (under 1 year)",default:28},{key:"b",label:"Live births (same year)",default:1000}],
+ formula:"IMR = Infant deaths (under 1 yr) ÷ Live births (same year) × 1000",
+ compute:function(v){var x=num(v.d)/num(v.b)*1000;
+   return{verdict:{t:"About <b>"+fmt(x,1)+" babies per 1,000</b> born die before their first birthday. (India ≈ 27, SRS.)",lv:"info"},results:[{label:"IMR",value:fmt(x,1)+" /1,000 LB",key:true}]};}},
+
+{id:"nmr",cat:"Vital Statistics &amp; Demography",plain:"Newborn deaths",tag:"NMR",
+ q:"How many newborns die in the first 28 days, per 1,000 born?",
+ ex:"Of 1,000 babies, 18 die within the first 28 days — what is the newborn death rate?",
+ inputs:[{key:"d",label:"Deaths under 28 days",default:18},{key:"b",label:"Live births",default:1000}],
+ formula:"NMR = Deaths under 28 days ÷ Live births × 1000",
+ compute:function(v){var x=num(v.d)/num(v.b)*1000;
+   return{verdict:{t:"About <b>"+fmt(x,1)+" per 1,000</b> newborns die within the first 28 days. (India ≈ 19, SRS.)",lv:"info"},results:[{label:"NMR",value:fmt(x,1)+" /1,000 LB",key:true}]};}},
+
+{id:"pnmr",cat:"Vital Statistics &amp; Demography",plain:"Deaths after the first month",tag:"Post-neonatal MR",
+ q:"How many die between 1 month and 1 year, per 1,000 born?",
+ ex:"Of 1,000 babies, 10 die between 1 month and 1 year — what is the post-neonatal rate?",
+ inputs:[{key:"d",label:"Deaths from 28 days to 1 year",default:10},{key:"b",label:"Live births",default:1000}],
+ formula:"Post-neonatal MR = Deaths 28 days–1 yr ÷ Live births × 1000",
+ compute:function(v){var x=num(v.d)/num(v.b)*1000;
+   return{verdict:{t:"About <b>"+fmt(x,1)+" per 1,000</b> babies die between 1 month and 1 year of age.",lv:"info"},results:[{label:"post-neonatal MR",value:fmt(x,1)+" /1,000 LB",key:true}]};}},
+
+{id:"perinatal",cat:"Vital Statistics &amp; Demography",plain:"Stillbirths + first-week deaths",tag:"Perinatal MR",
+ q:"How many babies are stillborn or die in the first week, per 1,000 births?",
+ ex:"Among 1,012 births, 12 are stillborn and 10 die in the first week — a check on delivery-care quality.",
+ inputs:[{key:"s",label:"Stillbirths (≥28 weeks)",default:12},{key:"e",label:"Deaths in first 7 days",default:10},{key:"t",label:"Total births (live + still)",default:1012}],
+ formula:"Perinatal MR = (Stillbirths + early neonatal deaths <7 d) ÷ Total births × 1000",
+ compute:function(v){var x=(num(v.s)+num(v.e))/num(v.t)*1000;
+   return{verdict:{t:"About <b>"+fmt(x,1)+" per 1,000</b> births are stillborn or die in the first week — a key measure of pregnancy and delivery care.",lv:"info"},results:[{label:"perinatal MR",value:fmt(x,1)+" /1,000",key:true}]};}},
+
+{id:"sbr",cat:"Vital Statistics &amp; Demography",plain:"Stillbirths",tag:"Stillbirth rate",
+ q:"How many babies are stillborn per 1,000 births?",
+ ex:"Among 1,012 births, 12 are stillborn — what is the stillbirth rate?",
+ inputs:[{key:"s",label:"Stillbirths",default:12},{key:"t",label:"Total births (live + still)",default:1012}],
+ formula:"Stillbirth rate = Stillbirths ÷ Total births (live + still) × 1000",
+ compute:function(v){var x=num(v.s)/num(v.t)*1000;
+   return{verdict:{t:"About <b>"+fmt(x,1)+" per 1,000</b> births are stillborn.",lv:"info"},results:[{label:"stillbirth rate",value:fmt(x,1)+" /1,000",key:true}]};}},
+
+{id:"u5mr",cat:"Vital Statistics &amp; Demography",plain:"Child deaths under 5",tag:"U5MR",
+ q:"How many children die before age 5, per 1,000 born?",
+ ex:"Of 1,000 children born, 35 die before age 5 — how does it compare to the SDG target of 25?",
+ inputs:[{key:"d",label:"Deaths under 5 years",default:35},{key:"b",label:"Live births (same year)",default:1000}],
+ formula:"U5MR = Deaths under 5 yr ÷ Live births × 1000",
+ compute:function(v){var x=num(v.d)/num(v.b)*1000;
+   return{verdict:{t:"About <b>"+fmt(x,1)+" children per 1,000</b> born die before age 5. (India ≈ 31, SRS; SDG target ≤ 25.)",lv:"info"},results:[{label:"U5MR",value:fmt(x,1)+" /1,000 LB",key:true}]};}},
+
+{id:"mmr",cat:"Vital Statistics &amp; Demography",plain:"Mothers' deaths in childbirth",tag:"MMR",
+ q:"How many mothers die per 1,00,000 live births?",
+ ex:"A state records 97 maternal deaths per 1,00,000 births — how far is it from the SDG target of 70?",
+ inputs:[{key:"d",label:"Maternal deaths",default:97},{key:"b",label:"Live births",default:100000}],
+ formula:"MMR = Maternal deaths ÷ Live births × 1,00,000",
+ compute:function(v){var x=num(v.d)/num(v.b)*100000;
+   return{verdict:{t:"About <b>"+fmt(x,0)+" mothers per 1,00,000</b> live births die from pregnancy-related causes. (India ≈ 93, SRS; SDG target ≤ 70.)",lv:"info"},results:[{label:"MMR",value:fmt(x,1)+" /1,00,000",key:true}]};}},
+
+{id:"gfr",cat:"Vital Statistics &amp; Demography",plain:"Births per woman of child-bearing age",tag:"GFR",
+ q:"How many babies are born per 1,000 women aged 15–49?",
+ ex:"A town with 24,000 women aged 15–49 has 1,800 births in a year — fertility per 1,000 women?",
+ inputs:[{key:"b",label:"Live births",default:1800},{key:"w",label:"Women aged 15–49",default:24000}],
+ formula:"GFR = Live births ÷ Women aged 15–49 × 1000",
+ compute:function(v){var x=num(v.b)/num(v.w)*1000;
+   return{verdict:{t:"About <b>"+fmt(x,1)+" babies per 1,000</b> women of child-bearing age (15–49) are born each year.",lv:"info"},results:[{label:"GFR",value:fmt(x,1)+" /1,000 women",key:true}]};}},
+
+{id:"tfr",cat:"Vital Statistics &amp; Demography",plain:"Children per woman (lifetime)",tag:"TFR",
+ q:"On average, how many children will a woman have in her life?",
+ ex:"Adding up a district's age-wise birth rates, how many children will an average woman have — above or below replacement (2.1)?",
+ inputs:[{key:"a",label:"Age-specific fertility rates (per 1,000 women, comma-separated)",type:"text",default:"20,120,130,80,40,15,5"},{key:"w",label:"Age-group width",unit:"yrs",default:5}],
+ formula:"TFR = (Σ age-specific fertility rates ÷ 1000) × age-group width",
+ method:"Replacement level is 2.1 — below it the population eventually shrinks. India's TFR is 2.0 (SRS).",
+ compute:function(v){var arr=list(v.a),s=arr.reduce(function(p,q){return p+q;},0),tfr=s/1000*num(v.w);
+   var band=tfr>2.15?"Above the 2.1 replacement level — the population is still growing.":tfr<2.05?"At or below the 2.1 replacement level — the population will stabilise or shrink over time.":"Right around the 2.1 replacement level.";
+   return{verdict:{t:"On average a woman has <b>"+fmt(tfr,2)+" children</b> in her lifetime. "+band,lv:"info"},results:[{label:"children/woman",value:fmt(tfr,2),key:true}]};}},
+
+{id:"dep",cat:"Vital Statistics &amp; Demography",plain:"Dependents per 100 workers",tag:"Dependency ratio",
+ q:"How many children and elderly does every 100 working-age adults support?",
+ ex:"A district has 3 lakh children, 6.5 lakh working adults and 50,000 elderly — how many dependents per 100 workers?",
+ inputs:[{key:"y",label:"Population 0–14 (children)",default:300000},{key:"w",label:"Population 15–64 (working age)",default:650000},{key:"o",label:"Population 65+ (elderly)",default:50000}],
+ formula:"Total dependency ratio = (Pop 0–14 + Pop 65+) ÷ Pop 15–64 × 100",
+ compute:function(v){var y=num(v.y),w=num(v.w),o=num(v.o);
+   return{verdict:{t:"For every 100 working-age adults (15–64), there are about <b>"+fmt((y+o)/w*100,0)+" dependents</b> (children + elderly) to support.",lv:"info"},
+     results:[{label:"total dependency",value:fmt((y+o)/w*100,1),key:true},{label:"children",value:fmt(y/w*100,1)},{label:"elderly",value:fmt(o/w*100,1)}]};}},
+
+{id:"sex",cat:"Vital Statistics &amp; Demography",plain:"Females per 1,000 males",tag:"Sex ratio",
+ q:"How balanced is the male–female population?",
+ ex:"A census block counts 9,430 females per 10,000 males — how balanced is it vs the 2011 figure of 943?",
+ inputs:[{key:"f",label:"Number of females",default:9430},{key:"m",label:"Number of males",default:10000}],
+ formula:"India (Census) sex ratio = Females ÷ Males × 1000",
+ method:"India reports females per 1,000 males (2011 Census = 943). A natural balance is about 950.",
+ compute:function(v){var f=num(v.f),m=num(v.m);
+   return{verdict:{t:"There are <b>"+fmt(f/m*1000,0)+" females</b> for every 1,000 males. (India 2011 Census = 943; a natural balance is about 950.)",lv:"info"},
+     results:[{label:"females /1,000 males",value:fmt(f/m*1000,0),key:true},{label:"males /1,000 females",value:fmt(m/f*1000,0)}]};}},
+
+{id:"dbl",cat:"Vital Statistics &amp; Demography",plain:"Years to double the population",tag:"Doubling time",
+ q:"At this growth rate, how long until the population doubles?",
+ ex:"A town grows 1.4% a year — in how many years will it double, for planning schools and clinics?",
+ inputs:[{key:"r",label:"Annual growth rate",unit:"%",default:1.4,step:"0.1"}],
+ formula:"Doubling time ≈ 70 ÷ growth rate (%)   (exact = 69.3 ÷ rate)",
+ compute:function(v){var r=num(v.r);
+   return{verdict:{t:"At this growth rate the population doubles in about <b>"+fmt(70/r,0)+" years</b>.",lv:"info"},results:[{label:"doubling time",value:fmt(70/r,1)+" yrs",key:true},{label:"exact",value:fmt(69.31/r,1)+" yrs"}]};}},
+
+/* ===== COMMUNICABLE DISEASE & IMMUNIZATION ===== */
+{id:"ve",cat:"Communicable Disease &amp; Immunization",plain:"How well the vaccine works",tag:"Vaccine efficacy",
+ q:"How much does the vaccine cut the chance of falling ill?",
+ ex:"In a trial, 10 of 1,000 vaccinated vs 50 of 1,000 unvaccinated catch flu — how well does the vaccine work?",
+ inputs:[{key:"cv",label:"Cases — vaccinated",default:10},{key:"nv",label:"Number vaccinated",default:1000},
+   {key:"cu",label:"Cases — unvaccinated",default:50},{key:"nu",label:"Number unvaccinated",default:1000}],
+ formula:"Vaccine efficacy = (ARU − ARV) ÷ ARU × 100 = (1 − RR) × 100",
+ compute:function(v){var ARV=num(v.cv)/num(v.nv),ARU=num(v.cu)/num(v.nu),VE=(ARU-ARV)/ARU*100,RR=ARV/ARU;
+   var lv=VE>=50?"good":VE>0?"ok":"bad";
+   var tx=VE>0?"The vaccine cut the disease by about <b>"+fmt(VE,0)+"%</b> — vaccinated people were far less likely to fall ill than unvaccinated.":"On these numbers the vaccine showed <b>no protection</b>.";
+   return{verdict:{t:tx,lv:lv},results:[{label:"vaccine efficacy",value:fmt(VE,1)+"%",key:true},{label:"ill if vaccinated",value:fmt(ARV*100,2)+"%"},{label:"ill if not",value:fmt(ARU*100,2)+"%"}]};}},
+
+{id:"herd",cat:"Communicable Disease &amp; Immunization",plain:"Coverage needed to stop spread",tag:"Herd immunity",
+ q:"What share of people must be immune to stop the disease spreading?",
+ ex:"Measles spreads fast (one case infects ~12); with a 95%-effective vaccine, what coverage stops outbreaks?",
+ inputs:[{key:"r0",label:"How many people one case infects (R₀)",default:12,step:"0.1"},{key:"e",label:"Vaccine efficacy",unit:"%",default:95}],
+ formula:"Herd immunity threshold = (1 − 1/R₀) × 100 ;  required coverage = threshold ÷ vaccine efficacy",
+ method:"R₀ for measles ≈ 12–18, COVID-19 (original) ≈ 2–3, influenza ≈ 1.3.",
+ compute:function(v){var r0=num(v.r0),e=num(v.e)/100,hit=(1-1/r0)*100,cov=hit/e;
+   var tx="To stop this disease spreading, about <b>"+fmt(hit,0)+"%</b> of people need to be immune"+(isFinite(cov)&&e<1?", which means vaccinating about <b>"+fmt(cov,0)+"%</b> (since the vaccine isn't 100% effective).":".");
+   var res=[{label:"immunity needed",value:fmt(hit,1)+"%",key:true}];
+   if(isFinite(cov)&&e<1)res.push({label:"vaccinate",value:fmt(cov,1)+"%"});
+   return{verdict:{t:tx,lv:"info"},results:res};}},
+
+{id:"r0est",cat:"Communicable Disease &amp; Immunization",plain:"Estimate R₀ — how fast it is spreading",tag:"R₀ estimate",
+ q:"From how fast cases are doubling, what is the reproduction number (R₀)?",
+ ex:"A new fever doubles every 4 days and cases are about 5 days apart (serial interval) — is it growing, and how fast?",
+ inputs:[{key:"td",label:"Doubling time of cases",unit:"days",default:4,step:"0.1"},
+   {key:"tg",label:"Serial / generation interval",unit:"days",default:5,step:"0.1"}],
+ formula:"r = ln 2 ÷ doubling time ;  R₀ ≈ 1 + r × serial interval",
+ method:"This is an ESTIMATE from the growth figures you enter — not a measured value. It needs real case-count data over time and a known serial interval. Reading: R₀&gt;1 spreading, =1 steady, &lt;1 fading. The same growth maths can roughly gauge a viral behaviour/challenge from adoption counts (illustrative, non-clinical). R₀ alone does NOT declare a public-health emergency — it is one input to that decision.",
+ compute:function(v){var td=num(v.td),tg=num(v.tg);if(!(td>0)){return{verdict:{t:"Enter a doubling time greater than 0.",lv:"info"},results:[]};}var r=Math.log(2)/td;var R=1+r*tg;
+   var lv=R>1.3?"bad":R>1?"ok":"good";
+   var tx=R>1?"Estimated <b>R₀ ≈ "+fmt(R,2)+"</b> — each case is infecting more than one other, so on these figures it is <b>growing</b>"+(R>1.5?" fast":"")+". Treat this as a signal to look harder, not as proof of an emergency.":"Estimated <b>R₀ ≈ "+fmt(R,2)+"</b> — below 1, so on these figures it is <b>fading</b>.";
+   return{verdict:{t:tx,lv:lv},results:[{label:"R₀ (estimate)",value:fmt(R,2),key:true},{label:"growth rate r",value:fmt(r,3)+" /day"},{label:"reading",value:R>1?"growing":"declining"}]};}},
+
+/* ===== NUTRITION & ANTHROPOMETRY ===== */
+{id:"bmi",cat:"Nutrition &amp; Anthropometry",plain:"Weight status (BMI)",tag:"BMI · Asian-Indian",
+ q:"Is this weight healthy, using India's cut-offs?",
+ ex:"A 70 kg adult who is 165 cm tall — a healthy weight by India's stricter cut-offs?",
+ inputs:[{key:"w",label:"Weight",unit:"kg",default:70},{key:"h",label:"Height",default:165},
+   {key:"hu",label:"Height in",type:"select",options:[{v:"cm",label:"cm"},{v:"m",label:"m"}],default:"cm"},
+   {key:"std",label:"Cut-offs",type:"select",options:[{v:"asia",label:"Asian-Indian"},{v:"who",label:"WHO global"}],default:"asia"}],
+ formula:"BMI = weight (kg) ÷ height (m)²",
+ method:"Asian-Indian: <18.5 underweight · 18.5–22.9 normal · 23–24.9 overweight · ≥25 obese.  WHO: ≥25 overweight · ≥30 obese.",
+ compute:function(v){var w=num(v.w),h=v.hu==="cm"?num(v.h)/100:num(v.h),bmi=w/(h*h),cat,lv;
+   if(v.std==="asia"){cat=bmi<18.5?"Underweight":bmi<23?"Normal":bmi<25?"Overweight":"Obese";
+     lv=(bmi>=18.5&&bmi<23)?"good":"bad";}
+   else{cat=bmi<18.5?"Underweight":bmi<25?"Normal":bmi<30?"Overweight":"Obese";
+     lv=(bmi>=18.5&&bmi<25)?"good":"bad";}
+   return{verdict:{t:"BMI is <b>"+fmt(bmi,1)+"</b> — <b>"+cat+"</b>"+(cat==="Normal"?" (healthy range).":"."),lv:lv},results:[{label:"BMI",value:fmt(bmi,1)+" kg/m²",key:true},{label:"category",value:cat}]};}},
+
+{id:"whr",cat:"Nutrition &amp; Anthropometry",plain:"Belly-fat risk",tag:"Waist–Hip ratio",
+ q:"Is there risky fat around the waist?",
+ ex:"A man with a 95 cm waist and 100 cm hips — is there risky belly fat?",
+ inputs:[{key:"wa",label:"Waist measurement",default:95},{key:"hi",label:"Hip measurement",default:100},
+   {key:"sex",label:"Sex",type:"select",options:[{v:"m",label:"Male"},{v:"f",label:"Female"}],default:"m"}],
+ formula:"Waist–Hip Ratio = Waist ÷ Hip  (same units)",
+ method:"Increased risk above 0.90 in men, 0.85 in women (WHO).",
+ compute:function(v){var whr=num(v.wa)/num(v.hi),thr=v.sex==="m"?0.90:0.85,high=whr>thr;
+   return{verdict:{t:"Waist-to-hip ratio is <b>"+fmt(whr,2)+"</b> — "+(high?"<b>higher than the safe limit</b>, pointing to risky belly fat.":"within the <b>acceptable</b> range."),lv:high?"bad":"good"},results:[{label:"waist–hip ratio",value:fmt(whr,2),key:true},{label:"risk",value:high?"High":"Acceptable"}]};}},
+
+{id:"bsa",cat:"Nutrition &amp; Anthropometry",plain:"Body surface area",tag:"BSA · Mosteller",
+ q:"What is the body surface area, used for some drug doses?",
+ ex:"For a 165 cm, 70 kg patient, what body surface area should drug or fluid doses use?",
+ inputs:[{key:"h",label:"Height",unit:"cm",default:165},{key:"w",label:"Weight",unit:"kg",default:70}],
+ formula:"BSA = √[(height cm × weight kg) ÷ 3600]",
+ compute:function(v){var bsa=Math.sqrt(num(v.h)*num(v.w)/3600);
+   return{verdict:{t:"Body surface area is <b>"+fmt(bsa,2)+" m²</b> — used for dosing some medicines and fluids.",lv:"info"},results:[{label:"BSA",value:fmt(bsa,2)+" m²",key:true}]};}},
+
+/* ===== BIOSTATISTICS & SAMPLE SIZE ===== */
+{id:"ssprop",cat:"Biostatistics &amp; Sample Size",plain:"How many people to survey",tag:"Sample size · 1 proportion",
+ q:"How many people must we survey to estimate something reliably?",
+ ex:"Planning a tobacco-use survey you expect near 20%, with ±5% accuracy — how many people to survey?",
+ inputs:[{key:"p",label:"Roughly how common (%)",default:20},{key:"d",label:"Accuracy wanted (± %)",default:5},
+   {key:"cl",label:"Confidence",type:"select",options:CONF,default:"95"},
+   {key:"deff",label:"Design effect (1 = simple random)",default:1,step:"0.1"},
+   {key:"nr",label:"Expected non-response (%)",default:10},
+   {key:"N",label:"Total population (optional)",type:"text",default:""}],
+ formula:"n = Z²·p·(1−p) ÷ d²  → × design effect → finite-population correction (if N) → ÷ (1 − non-response)",
+ compute:function(v){var p=num(v.p)/100,d=num(v.d)/100,zz=Z[v.cl],deff=num(v.deff),nr=num(v.nr)/100,N=num(v.N);
+   var n0=zz*zz*p*(1-p)/(d*d),nd=n0*deff,nf=nd;
+   if(isFinite(N)&&N>0)nf=nd/(1+(nd-1)/N);
+   var fin=(nr<1)?nf/(1-nr):NaN;
+   return{verdict:{t:"You would need to survey about <b>"+ceil(fin)+" people</b> to estimate this reliably (after allowing for survey design and non-response).",lv:"info"},
+     results:[{label:"people to survey",value:ceil(fin),key:true},{label:"base number",value:ceil(n0)},{label:"after design effect",value:ceil(nd)}]};}},
+
+{id:"ss2prop",cat:"Biostatistics &amp; Sample Size",plain:"Sample size to compare two groups (%)",tag:"Sample size · 2 proportions",
+ q:"How many people per group to detect a difference in percentages?",
+ ex:"Testing whether health education lifts handwashing from 30% to 45% — how many per group?",
+ inputs:[{key:"p1",label:"Percentage in group 1",unit:"%",default:30},{key:"p2",label:"Percentage in group 2",unit:"%",default:45},
+   {key:"cl",label:"Confidence (2-sided)",type:"select",options:CONF,default:"95"},{key:"pw",label:"Power",type:"select",options:POW,default:"80"}],
+ formula:"n/group = [Zα√(2p̄(1−p̄)) + Zβ√(p₁q₁+p₂q₂)]² ÷ (p₁−p₂)²",
+ compute:function(v){var p1=num(v.p1)/100,p2=num(v.p2)/100,pb=(p1+p2)/2,za=Z[v.cl],zb=ZB[v.pw];
+   var n1=Math.pow(za*Math.sqrt(2*pb*(1-pb))+zb*Math.sqrt(p1*(1-p1)+p2*(1-p2)),2),nper=n1/Math.pow(p1-p2,2);
+   return{verdict:{t:"You would need about <b>"+ceil(nper)+" people in each group</b> (≈ "+ceil(nper*2)+" total) to detect this difference.",lv:"info"},
+     results:[{label:"per group",value:ceil(nper),key:true},{label:"total",value:ceil(nper*2)}]};}},
+
+{id:"ss2mean",cat:"Biostatistics &amp; Sample Size",plain:"Sample size to compare two averages",tag:"Sample size · 2 means",
+ q:"How many people per group to detect a difference in averages?",
+ ex:"Testing whether a salt-reduction drive lowers blood pressure by 5 mmHg (spread ~10) — how many per group?",
+ inputs:[{key:"diff",label:"Difference you want to detect",default:5},{key:"sd",label:"Spread of values (SD)",default:10},
+   {key:"cl",label:"Confidence (2-sided)",type:"select",options:CONF,default:"95"},{key:"pw",label:"Power",type:"select",options:POW,default:"80"}],
+ formula:"n/group = 2σ²(Zα + Zβ)² ÷ Δ²",
+ compute:function(v){var d=num(v.diff),s=num(v.sd),za=Z[v.cl],zb=ZB[v.pw];
+   var nper=2*s*s*Math.pow(za+zb,2)/(d*d);
+   return{verdict:{t:"You would need about <b>"+ceil(nper)+" people per group</b> (≈ "+ceil(nper*2)+" total).",lv:"info"},
+     results:[{label:"per group",value:ceil(nper),key:true},{label:"total",value:ceil(nper*2)}]};}},
+
+{id:"ciprop",cat:"Biostatistics &amp; Sample Size",plain:"Margin of error of a percentage",tag:"Confidence interval",
+ q:"Given a survey result, what is the likely true range?",
+ ex:"A survey of 246 people finds 20% use tobacco — what is the likely true range?",
+ inputs:[{key:"p",label:"Result observed",unit:"%",default:20},{key:"n",label:"Number surveyed",default:246},
+   {key:"cl",label:"Confidence",type:"select",options:CONF,default:"95"}],
+ formula:"CI = p ± Z·√[p(1−p)/n]",
+ compute:function(v){var p=num(v.p)/100,n=num(v.n),zz=Z[v.cl],se=Math.sqrt(p*(1-p)/n);
+   return{verdict:{t:"We can be "+v.cl+"% confident the true figure lies between <b>"+fmt((p-zz*se)*100,1)+"%</b> and <b>"+fmt((p+zz*se)*100,1)+"%</b>.",lv:"info"},
+     results:[{label:"lower",value:fmt((p-zz*se)*100,1)+"%",key:true},{label:"upper",value:fmt((p+zz*se)*100,1)+"%",key:true},{label:"margin of error",value:"±"+fmt(zz*se*100,1)+"%"}]};}},
+
+{id:"desc",cat:"Biostatistics &amp; Sample Size",plain:"Average and spread of your data",tag:"Mean · SD · SE",
+ q:"What is the average and how spread out are the values?",
+ ex:"You weigh 7 children and want the average weight and how much it varies.",
+ inputs:[{key:"x",label:"Your values (comma-separated)",type:"text",default:"12,15,14,10,18,20,16"}],
+ formula:"Mean = Σx/n ;  SD = √[Σ(x−x̄)²/(n−1)] ;  SE = SD/√n",
+ compute:function(v){var a=list(v.x),n=a.length;if(n<2)return{verdict:{t:"Enter at least 2 numbers.",lv:"ok"},results:[]};
+   var mean=a.reduce(function(p,q){return p+q;},0)/n;
+   var ssq=a.reduce(function(p,q){return p+Math.pow(q-mean,2);},0),sd=Math.sqrt(ssq/(n-1)),se=sd/Math.sqrt(n);
+   return{verdict:{t:"The average is <b>"+fmt(mean,2)+"</b> (from "+n+" values), give or take "+fmt(sd,2)+" (standard deviation).",lv:"info"},
+     results:[{label:"average",value:fmt(mean,2),key:true},{label:"count",value:n},{label:"SD",value:fmt(sd,2)},{label:"SE",value:fmt(se,2)}]};}},
+
+/* ===== FAMILY PLANNING ===== */
+{id:"pearl",cat:"Family Planning",plain:"How well a contraceptive works",tag:"Pearl Index",
+ q:"How many pregnancies happen per 100 women using it for a year?",
+ ex:"Over a year, IUD users log 12,000 months of use and 5 pregnancies occur — how effective is it?",
+ inputs:[{key:"p",label:"Accidental pregnancies",default:5},{key:"m",label:"Total months all women used it",default:12000}],
+ formula:"Pearl Index = (Accidental pregnancies × 1200) ÷ Total months of use",
+ method:"1200 = 100 women × 12 months. Lower = more effective.",
+ compute:function(v){var pi=num(v.p)*1200/num(v.m),lv=pi<1?"good":pi<10?"ok":"bad";
+   var tx="About <b>"+fmt(pi,1)+" pregnancies</b> occur per 100 women using this method for a year. "+(pi<1?"Highly effective.":pi<10?"Moderately effective.":"Less effective — many pregnancies still occur.");
+   return{verdict:{t:tx,lv:lv},results:[{label:"per 100 woman-years",value:fmt(pi,2),key:true}]};}},
+
+{id:"cpr",cat:"Family Planning",plain:"Family-planning coverage",tag:"Couple Protection Rate",
+ q:"What share of eligible couples are protected by a method?",
+ ex:"In a village with 1,000 eligible couples, 600 use a method — is coverage at the 60% target?",
+ inputs:[{key:"p",label:"Couples effectively protected",default:600},{key:"e",label:"Total eligible couples",default:1000}],
+ formula:"Couple Protection Rate = Protected couples ÷ Eligible couples × 100",
+ method:"Eligible couple = married, wife in reproductive age. National target ≈ 60%.",
+ compute:function(v){var c=num(v.p)/num(v.e)*100,lv=c>=60?"good":"ok";
+   return{verdict:{t:"<b>"+fmt(c,0)+"%</b> of eligible couples are protected by a family-planning method. "+(c>=60?"At or above the national target of 60%.":"Below the national target of about 60%."),lv:lv},results:[{label:"coverage",value:fmt(c,1)+"%",key:true}]};}}
+];
+
+/* ---------- render engine ---------- */
+var byId={};CALCS.forEach(function(c){byId[c.id]=c;});
+function cats(){var o=[],seen={};CALCS.forEach(function(c){if(!seen[c.cat]){seen[c.cat]=1;o.push(c.cat);}});return o;}
+function ctitle(cat){return (CATMETA[cat]&&CATMETA[cat].t)||cat;}
+var activeCat="All",q="";
+
+function inputHTML(c,inp){
+  var id=c.id+"__"+inp.key, lbl=inp.label+(inp.unit?' <em>'+inp.unit+'</em>':'');
+  if(inp.type==="select"){
+    var opts=inp.options.map(function(o){return '<option value="'+o.v+'"'+(String(o.v)===String(inp.default)?' selected':'')+'>'+o.label+'</option>';}).join('');
+    return '<label class="fld"><span>'+lbl+'</span><select id="'+id+'" data-c="'+c.id+'">'+opts+'</select></label>';
+  }
+  var t=inp.type==="text"?"text":"number", val=(inp.default!==undefined&&inp.default!=="")?' value="'+inp.default+'"':(inp.default===""?' value=""':'');
+  var step=inp.step?' step="'+inp.step+'"':(t==="number"?' step="any"':'');
+  return '<label class="fld"><span>'+lbl+'</span><input type="'+t+'" id="'+id+'" data-c="'+c.id+'"'+val+step+' inputmode="decimal"></label>';
+}
+function cardHTML(c){
+  var ins=c.inputs.map(function(i){return inputHTML(c,i);}).join('');
+  var meth=c.method?'<span class="m">'+c.method+'</span>':'';
+  return '<div class="card" data-id="'+c.id+'">'+
+    '<div class="cn"><h3>'+c.plain+'</h3><span class="tag">'+c.tag+'</span></div>'+
+    '<div class="q">'+c.q+'</div>'+
+    (c.ex?'<div class="ex"><b>Example.</b> '+c.ex+'</div>':'')+
+    '<div class="two">'+ins+'</div>'+
+    '<div class="out" id="'+c.id+'__out"></div>'+
+    '<details class="more"><summary>Formula &amp; method</summary><div class="fbody"><b>ƒ</b>'+c.formula+meth+'</div></details>'+
+    '</div>';
+}
+function build(){
+  var app=document.getElementById("app"),html="";
+  cats().forEach(function(cat){
+    var inCat=CALCS.filter(function(c){return c.cat===cat;});
+    var m=CATMETA[cat]||{t:cat,d:""};
+    html+='<div class="sec" data-cat="'+cat+'"><h2>'+m.t+'</h2><div class="secd">'+m.d+'</div><div class="cards">'+inCat.map(cardHTML).join('')+'</div></div>';
+  });
+  html+='<div class="empty" id="empty" style="display:none">No calculator matches your search.</div>';
+  app.innerHTML=html;
+  CALCS.forEach(run);
+  var chips=document.getElementById("chips"),ch='<span class="chip on" data-cat="All">All</span>';
+  cats().forEach(function(cat){ch+='<span class="chip" data-cat="'+cat+'">'+ctitle(cat)+'</span>';});
+  chips.innerHTML=ch;
+}
+function run(c){
+  var v={};c.inputs.forEach(function(i){var el=document.getElementById(c.id+"__"+i.key);v[i.key]=el?el.value:"";});
+  var out;try{out=c.compute(v);}catch(e){out=null;}
+  var t=document.getElementById(c.id+"__out");if(!t)return;
+  if(!out){t.innerHTML="";return;}
+  var h="";
+  if(out.verdict&&out.verdict.t)h+='<div class="verdict v-'+(out.verdict.lv||'info')+'">'+out.verdict.t+'</div>';
+  if(out.results&&out.results.length)
+    h+='<div class="nums">'+out.results.map(function(r){
+      return '<span class="num'+(r.key?' key':'')+'"><b>'+r.value+(r.unit?' '+r.unit:'')+'</b>'+r.label+'</span>';}).join('')+'</div>';
+  t.innerHTML=h;
+}
+function filter(){
+  var any=false;
+  CALCS.forEach(function(c){
+    var card=document.querySelector('.card[data-id="'+c.id+'"]');if(!card)return;
+    var hay=(c.plain+' '+c.tag+' '+c.q+' '+ctitle(c.cat)).toLowerCase();
+    var ok=(activeCat==="All"||c.cat===activeCat)&&(q===""||hay.indexOf(q)>-1);
+    card.style.display=ok?"":"none";if(ok)any=true;
+  });
+  document.querySelectorAll('.sec').forEach(function(s){
+    var vis=s.querySelectorAll('.card:not([style*="none"])').length;s.style.display=vis?"":"none";});
+  document.getElementById("empty").style.display=any?"none":"block";
+}
+document.addEventListener("input",function(e){var id=e.target.getAttribute&&e.target.getAttribute("data-c");if(id)run(byId[id]);});
+document.addEventListener("change",function(e){var id=e.target.getAttribute&&e.target.getAttribute("data-c");if(id)run(byId[id]);});
+document.getElementById("search").addEventListener("input",function(e){q=e.target.value.trim().toLowerCase();filter();});
+document.getElementById("chips").addEventListener("click",function(e){
+  if(!e.target.classList.contains("chip"))return;
+  document.querySelectorAll(".chip").forEach(function(c){c.classList.remove("on");});
+  e.target.classList.add("on");activeCat=e.target.getAttribute("data-cat");filter();});
+document.getElementById("seg").addEventListener("click",function(e){
+  var b=e.target.closest?e.target.closest("button"):(e.target.tagName==="BUTTON"?e.target:null);
+  if(!b)return;
+  var btns=document.querySelectorAll("#seg button");
+  for(var i=0;i<btns.length;i++)btns[i].classList.remove("on");
+  b.classList.add("on");
+  document.body.classList.toggle("sci",b.getAttribute("data-mode")==="sci");});
+
+build();
+document.getElementById("foot").innerHTML="Telangana Nethra · "+CALCS.length+" calculators · ఆరోగ్యం · Switch to Scientific mode for formulas &amp; method. Formulas per Park's Textbook of Preventive &amp; Social Medicine and WHO/ICMR; India rates from SRS (Registrar General of India). Educational &amp; planning use only.";
+</script>
+</body>
+</html>

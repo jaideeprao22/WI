@@ -1,6 +1,6 @@
-# World Intelligence — civic health console
+# Telangana Nethra — Public Health Intelligence Network
 
-A working, end-to-end demonstration of one closed loop:
+A working, end-to-end demonstration of one full cycle:
 **Listen → Structure → Forecast → Act → Deliver.**
 
 Ten working features, one shared in-browser engine (behaves like a real
@@ -14,7 +14,7 @@ even by opening `index.html` directly.
 
 | Tab | Feature | What it does |
 |---|---|---|
-| 01 | **World Intelligence** | Capture a field report as a structured LRKU; it flows live into the signals and map |
+| 01 | **Lived Reality** | Capture a field report as a structured LRKU; it flows live into the signals and map |
 | 02 | **Praja Intelligence** | Live signal score for all 33 districts + geographic map |
 | 03 | **Praja Darpan** | 30-day spread forecast + a decision panel (who's protected, at what cost per 1,000) |
 | 04 | **Infodemic Shield** | Classify a rumour (English or Telugu) → vetted Telugu counter-message + messenger |
@@ -25,7 +25,7 @@ even by opening `index.html` directly.
 | 09 | **PHC Action Queue** | Converts intelligence into accountable PHC tasks |
 | 10 | **Minister Brief** | One-click executive brief with forecast, cost, action and safety boundary |
 
-The **Run the full loop** button at the top pushes one real signal
+The **Run the full cycle** button at the top pushes one real signal
 through all five stages and animates it.
 
 ---
@@ -107,38 +107,37 @@ All three are wired to the same WhatsApp dispatch and the same engine, so a reca
 
 ---
 
-## Added in this 2x real-world build
+## Depth added across the five domains (this build)
 
-This version adds one practical problem-solving layer inside each of the five core domains, instead of only adding more screens.
+The previous version was wide but shallow — one form, one result per domain. This build adds real, usable depth, with honest labels on what is a tool vs. a model:
 
-### 1. World Intelligence — LRKU quality and action card
+- **Infodemic Shield → Rumour library.** 14 real health myths circulating in the field (papaya-leaf "cure", stopping BP/sugar tablets, vaccine-infertility, dog-bite remedies, pregnancy swelling, "drink less water in heat", etc.), each with a vetted plain-English reality and a **safe Telugu reply ready to send on WhatsApp or copy**. Searchable. This is a real job-aid, not a model.
+- **Safety Guard → Referral & danger-sign field guide.** Conservative "refer immediately if…" criteria for all six domains in English + Telugu, searchable, **works offline**. Routes danger signs to PHC staff — no diagnosis, no dose.
+- **Praja Darpan → tunable, transparent forecast.** A transmission-intensity control lets the user set local outbreak speed; the model recomputes live and shows the multiplier. The hidden assumption is now in the operator's hands and on screen. Still an illustrative model — clearly labelled.
+- **Lived Reality → bulk field-report import + search + export.** Import a whole register of field observations from CSV, search the knowledge bank, and export it back to CSV for analysis. Real data in and out.
+- **Aarogyam 365 → calendar export (.ics).** The 12 monthly prevention actions download as a phone calendar with yearly reminders and the Telugu message in each event.
 
-A field story is not automatically useful intelligence. The new LRKU quality card checks completeness, missing fields, detected domain, risk type, and safe use-cases. This helps prevent noisy stories from entering the model unreviewed.
+**Honest ceiling (unchanged):** the forecast is a model, not a measured prediction; everything runs in one browser on `localStorage`. It becomes a multi-user system only when the engine's store is pointed at Supabase (the UI is already structured for it), and it becomes *proven* only after a real pilot with one ASHA/PHC using real data. More tabs will not change that — depth and a field test will.
 
-### 2. Praja Intelligence — UPHC microplan generator
+---
 
-For the selected domain, the app now converts a district signal into a field microplan: target households, estimated ASHA field-days, campaign days, trusted messenger, Telugu message, and four operational tasks.
+## Added: Aarogya Darpan Telangana (tab 13) — verified-doctor access layer
 
-### 3. Praja Darpan — budget optimizer
+Adapted from the standalone build and merged into this (full-feature) version so nothing else was lost. It is a citizen-facing **doctor access + anti-quackery transparency** layer, deliberately built to stay on the safe side of the law:
 
-Officials can enter a fixed budget and compare intervention options. The app recommends the best affordable response by households protected and cost per protected household.
+- **Verify before visit** — check a name/registration; the demo answers verified / unable-to-verify and always points to the official **NMC National Medical Register / Telangana State Medical Council** for real confirmation.
+- **Doctor access map + profiles** with a **Public Health Access Grade** that explicitly measures registration, transparency, public-health participation, access and structured patient experience — **not clinical quality**, and not a "best/worst doctor" list.
+- **Claim/add profile** (opt-in), **structured patient-experience signal** (private, not public allegations), **district access-gap table** (aggregate, population-level), and a **QR trust card** a doctor generates for their own profile.
 
-### 4. Infodemic Shield — counter-message pack
+**Safety properties baked in:** every profile is a clearly-labelled fictional **"Dr. Demo …"** sample with a placeholder **TSMC-DEMO** number — no real doctor is named, graded, or "verified," and nothing is scraped from any registry. A banner states this on the tab. That is the difference between a safe transparency concept and a defamation/data-protection problem.
 
-The app now generates a field-ready pack: ASHA audio line, PHC doctor OPD line, SHG group message, and pre-bunk checklist. This is more useful than one generic counter-message.
+---
 
-### 5. Aarogyam 365 — family action checklist
+## Telangana Nethra — front door (this build)
 
-For a selected domain, district and month, the app generates a household checklist and feedback questions that can be copied or sent on WhatsApp.
+The app was rebranded from the old console name to **Telangana Nethra — Public Health Intelligence Network**, and given a proper entry point so it no longer opens as a wall of tabs:
 
-### New API-style routes
+- **Home.html** — a landing page that states what Nethra is, shows the full cycle, and presents the modules grouped (the full cycle · frontline tools · plan & coordinate · citizen access). Every card deep-links straight into that module in the console.
+- **Sitemap.html** — the whole network on one page.
 
-```text
-POST /lrku/analyze
-POST /praja/microplan
-POST /darpan/optimize
-POST /shield/pack
-POST /aarogyam/checklist
-```
-
-These are still browser-local routes inside `engine.js`, so the app remains GitHub Pages compatible.
+Both pages are **plain static HTML** — they work offline / on `file://`, need no React/Babel/CDN, and you can edit the copy yourself. (The earlier versions of these pages depended on a CDN runtime and broke offline; this does not.) The console deep-links via `index.html#<module>`, so Home → "Aarogya Darpan" opens the doctor tab directly.

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>World Intelligence — Telangana civic health console</title>
+<title>Telangana Nethra — Public Health Intelligence Network</title>
 <meta name="description" content="A working demonstration: listen to lived reality, forecast risk, rehearse the response, and dispatch Telugu action through trusted messengers.">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="styles.css">
@@ -15,41 +15,86 @@
 </head>
 <body>
 
-<!-- ================= TOP BAR ================= -->
-<header class="topbar">
-  <div class="wrap topbar-in">
-    <div class="brand">
-      <div class="seal">WI</div>
-      <div class="wordmark">
-        <b>World Intelligence</b>
-        <span>Telangana civic health console</span>
-      </div>
-    </div>
-    <div class="state" id="stateChips">
-      <span class="chip">data <span class="chip-v" id="scData">—</span></span>
-      <span class="chip">model <span class="chip-v" id="scModel">—</span></span>
-      <span class="chip live">LRKUs <span class="chip-v" id="scLrku">—</span></span>
-      <span class="chip">campaigns <span class="chip-v" id="scCamp">—</span></span>
-      <span class="chip boost">model boost <span class="chip-v" id="scBoost">—</span></span>
-      <button class="btn sm" id="installBtn" style="display:none">⤓ Install</button>
-    </div>
-  </div>
-</header>
+<div class="app">
 
-<main class="wrap">
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar" id="sidebar">
+    <a class="sb-brand" href="Home.html" title="Back to home">
+      <div class="seal">నే</div>
+      <div class="wordmark"><b>Telangana Nethra</b><span>Public Health Intelligence</span></div>
+    </a>
+    <button class="sb-search" id="openCmdk" type="button"><span class="mag">⌕</span> Search modules… <kbd>⌘K</kbd></button>
+    <nav class="sb-nav" role="tablist" aria-label="Console sections">
+      <div class="sb-group">
+        <div class="sb-glabel">Start here</div>
+        <button class="tab nav-item active" data-tab="overview" data-name="Overview" data-sub="Today’s worklist & system status" role="tab"><span class="ni-ix">00</span><span class="ni-tx"><b>Overview</b><em>Worklist & status</em></span></button>
+      </div>
+      <div class="sb-group">
+        <div class="sb-glabel">The cycle · listen → act</div>
+        <button class="tab nav-item" data-tab="world" data-name="Field reports" data-sub="Lived Reality · capture what people report" role="tab"><span class="ni-ix">01</span><span class="ni-tx"><b>Field reports</b><em>Lived Reality</em></span></button>
+        <button class="tab nav-item" data-tab="praja" data-name="Signal map" data-sub="Praja Intelligence · district risk map" role="tab"><span class="ni-ix">02</span><span class="ni-tx"><b>Signal map</b><em>Praja Intelligence</em></span></button>
+        <button class="tab nav-item" data-tab="darpan" data-name="Forecast & response" data-sub="Praja Darpan · model spread, test a response" role="tab"><span class="ni-ix">03</span><span class="ni-tx"><b>Forecast & response</b><em>Praja Darpan</em></span></button>
+        <button class="tab nav-item" data-tab="shield" data-name="Rumour response" data-sub="Infodemic Shield · counter a myth in Telugu" role="tab"><span class="ni-ix">04</span><span class="ni-tx"><b>Rumour response</b><em>Infodemic Shield</em></span></button>
+        <button class="tab nav-item" data-tab="aarogyam" data-name="Prevention calendar" data-sub="Aarogyam 365 · a year of action" role="tab"><span class="ni-ix">05</span><span class="ni-tx"><b>Prevention calendar</b><em>Aarogyam 365</em></span></button>
+      </div>
+      <div class="sb-group">
+        <div class="sb-glabel">Frontline tools</div>
+        <button class="tab nav-item" data-tab="voice" data-name="Voice kiosk" data-sub="Jeevana Voice · safe Telugu patient answers" role="tab"><span class="ni-ix">06</span><span class="ni-tx"><b>Voice kiosk</b><em>Jeevana Voice</em></span></button>
+        <button class="tab nav-item" data-tab="patients" data-name="Patient triage" data-sub="Patient Queue · register & triage RED/AMBER/GREEN" role="tab"><span class="ni-ix">12</span><span class="ni-tx"><b>Patient triage</b><em>Patient Queue</em></span></button>
+        <button class="tab nav-item" data-tab="recall" data-name="Patient recall" data-sub="NCD Recall · chase missed follow-ups" role="tab"><span class="ni-ix">11</span><span class="ni-tx"><b>Patient recall</b><em>NCD Recall</em></span></button>
+        <button class="tab nav-item" data-tab="safety" data-name="Safety check" data-sub="Safety Guard · red-flag triage & referral guide" role="tab"><span class="ni-ix">07</span><span class="ni-tx"><b>Safety check</b><em>Safety Guard</em></span></button>
+      </div>
+      <div class="sb-group">
+        <div class="sb-glabel">Plan & coordinate</div>
+        <button class="tab nav-item" data-tab="trust" data-name="Messenger planner" data-sub="Trust Network · pick the trusted messenger" role="tab"><span class="ni-ix">08</span><span class="ni-tx"><b>Messenger planner</b><em>Trust Network</em></span></button>
+        <button class="tab nav-item" data-tab="ops" data-name="Task queue" data-sub="PHC Ops · accountable field tasks" role="tab"><span class="ni-ix">09</span><span class="ni-tx"><b>Task queue</b><em>PHC Ops</em></span></button>
+        <button class="tab nav-item" data-tab="brief" data-name="Minister brief" data-sub="One-click executive summary" role="tab"><span class="ni-ix">10</span><span class="ni-tx"><b>Minister brief</b><em>Executive summary</em></span></button>
+      </div>
+      <div class="sb-group">
+        <div class="sb-glabel">Citizen access</div>
+        <button class="tab nav-item" data-tab="doctors" data-name="Doctor access map" data-sub="Aarogya Darpan · verify before visit" role="tab"><span class="ni-ix">13</span><span class="ni-tx"><b>Doctor access map</b><em>Aarogya Darpan</em></span></button>
+      </div>
+      <div class="sb-group">
+        <div class="sb-glabel">Go to · other sections</div>
+        <a class="nav-link" href="Home.html"><span class="ni-ix">⌂</span><span class="ni-tx"><b>Home</b><em>Landing &amp; overview</em></span><span class="ext">↗</span></a>
+        <a class="nav-link" href="ControlRoom.html"><span class="ni-ix">◉</span><span class="ni-tx"><b>Control Room</b><em>Emergency dashboard</em></span><span class="ext">↗</span></a>
+        <a class="nav-link" href="Calculators.html"><span class="ni-ix">∑</span><span class="ni-tx"><b>Calculators</b><em>Field tools & R₀</em></span><span class="ext">↗</span></a>
+        <a class="nav-link" href="Sitemap.html"><span class="ni-ix">⊞</span><span class="ni-tx"><b>Sitemap</b><em>Everything on one page</em></span><span class="ext">↗</span></a>
+      </div>
+    </nav>
+  </aside>
+  <div class="nav-scrim" id="navScrim"></div>
+
+  <!-- ================= MAIN ================= -->
+  <div class="main">
+    <header class="appbar">
+      <button class="ab-burger" id="navBurger" aria-label="Open menu">☰</button>
+      <div class="ab-title"><b id="abName">Overview</b><span id="abSub">Today’s worklist & system status</span></div>
+      <div class="state" id="stateChips">
+        <span class="chip">data <span class="chip-v" id="scData">—</span></span>
+        <span class="chip">model <span class="chip-v" id="scModel">—</span></span>
+        <span class="chip live">LRKUs <span class="chip-v" id="scLrku">—</span></span>
+        <span class="chip">campaigns <span class="chip-v" id="scCamp">—</span></span>
+        <span class="chip boost">model boost <span class="chip-v" id="scBoost">—</span></span>
+        <button class="btn sm" id="installBtn" style="display:none">⤓ Install</button>
+      </div>
+    </header>
+    <main class="content">
+
+      <div id="ovIntro">
 
   <!-- ================= HERO ================= -->
   <section class="hero">
     <p class="eyebrow">An intelligence trained on what people actually do — not on the internet</p>
     <h1>Hear the village. Forecast the harm. <em>Act before it spreads.</em></h1>
-    <p>Most health systems learn about a rumour or an outbreak after it has already cost someone. This console closes the loop end to end: it structures lived reports from the field, forecasts how a belief or a disease moves across districts, rehearses which response works, and sends a Telugu message through the messenger people trust — then learns from what comes back.</p>
+    <p>Most health systems learn about a rumour or an outbreak after it has already cost someone. This console closes the cycle end to end: it structures lived reports from the field, forecasts how a belief or a disease moves across districts, rehearses which response works, and sends a Telugu message through the messenger people trust — then learns from what comes back.</p>
   </section>
 
   <!-- ================= PIPELINE (signature) ================= -->
   <section class="pipe" id="pipe">
     <div class="pipe-head">
-      <span class="lbl">The closed loop</span>
-      <button class="btn primary" id="runLoop">▶ Run the full loop</button>
+      <span class="lbl">The full cycle</span>
+      <button class="btn primary" id="runLoop">▶ Run the full cycle</button>
     </div>
     <div class="pipe-track">
       <svg class="pipe-wire" viewBox="0 0 100 2" preserveAspectRatio="none" aria-hidden="true">
@@ -62,25 +107,10 @@
       <div class="node" data-stage="3"><div class="dot">4</div><div class="nm">Act</div><div class="sub">choose the response</div></div>
       <div class="node" data-stage="4"><div class="dot">5</div><div class="nm">Deliver</div><div class="sub">Telugu via trusted voice</div></div>
     </div>
-    <div class="pipe-out" id="pipeOut">Press <b>Run the full loop</b> to send one real field signal through all five stages.</div>
+    <div class="pipe-out" id="pipeOut">Press <b>Run the full cycle</b> to send one real field signal through all five stages.</div>
   </section>
 
-  <!-- ================= TABS ================= -->
-  <nav class="tabs" id="tabs" role="tablist">
-    <button class="tab active" data-tab="overview" role="tab"><span class="ix">00</span>Overview</button>
-    <button class="tab" data-tab="world" role="tab"><span class="ix">01</span>World Intelligence</button>
-    <button class="tab" data-tab="praja" role="tab"><span class="ix">02</span>Praja Intelligence</button>
-    <button class="tab" data-tab="darpan" role="tab"><span class="ix">03</span>Praja Darpan</button>
-    <button class="tab" data-tab="shield" role="tab"><span class="ix">04</span>Infodemic Shield</button>
-    <button class="tab" data-tab="aarogyam" role="tab"><span class="ix">05</span>Aarogyam 365</button>
-    <button class="tab" data-tab="voice" role="tab"><span class="ix">06</span>Jeevana Voice</button>
-    <button class="tab" data-tab="safety" role="tab"><span class="ix">07</span>Safety Guard</button>
-    <button class="tab" data-tab="trust" role="tab"><span class="ix">08</span>Trust Network</button>
-    <button class="tab" data-tab="ops" role="tab"><span class="ix">09</span>PHC Ops</button>
-    <button class="tab" data-tab="brief" role="tab"><span class="ix">10</span>Minister Brief</button>
-    <button class="tab" data-tab="recall" role="tab"><span class="ix">11</span>NCD Recall</button>
-    <button class="tab" data-tab="patients" role="tab"><span class="ix">12</span>Patient Queue</button>
-  </nav>
+      </div><!-- /ovIntro -->
 
   <!-- ---------- 00 OVERVIEW ---------- -->
   <section class="panel show" id="p-overview" role="tabpanel">
@@ -121,12 +151,15 @@
   <section class="panel" id="p-world" role="tabpanel">
     <div class="panel-head">
       <span class="k">01 — Listen &amp; structure</span>
-      <h2>World Intelligence — the lived-reality knowledge bank</h2>
+      <h2>Lived reality — the field knowledge bank</h2>
       <p>The raw material no frontier model has: what a real household believed, what they did, and what happened. Each report is captured as a <b>Lived-Reality Knowledge Unit (LRKU)</b> — consented, structured, and ready to feed the model. Add one and watch it flow into the signals and the map.</p>
+    <div style="margin:12px 0 4px;padding:10px 13px;border:1px solid #1d3338;border-radius:10px;background:rgba(54,214,194,.06);font-size:12.5px;color:#8aa3a3;line-height:1.55">
+      <b style="color:#36D6C2">Aligned with IDSP / IHIP.</b> These field reports map to <b style="color:#cfe0e0">Form S (syndromic)</b> — symptom signals from ASHAs &amp; ANMs, captured before lab confirmation. <b style="color:#cfe0e0">Form P</b> (presumptive, by medical officers) and <b style="color:#cfe0e0">Form L</b> (laboratory-confirmed) feed in from facilities. <i>Designed to align with national reporting — not a live IHIP feed in this demo.</i>
+    </div>
     </div>
     <div class="grid g-1-1-form">
       <div class="card tint">
-        <h3>Capture a field report</h3>
+        <h3>Capture a field report <span style="font-size:10px;letter-spacing:.4px;color:#36D6C2;border:1px solid rgba(54,214,194,.4);border-radius:20px;padding:2px 7px;margin-left:6px;vertical-align:middle">FORM S</span></h3>
         <div class="field"><label>District</label><select class="select" id="wDistrict"></select></div>
         <div class="row">
           <div class="field"><label>Domain</label><select class="select" id="wDomain"></select></div>
@@ -140,18 +173,18 @@
       </div>
       <div class="card">
         <h3>Knowledge bank <span class="hint" id="wCount">—</span></h3>
+        <div class="row" style="margin-bottom:10px">
+          <input class="input" id="wSearch" placeholder="Search the bank…" style="flex:1;min-width:130px">
+          <input type="file" id="wImport" accept=".csv,text/csv" class="input" style="max-width:150px;padding:7px;font-size:12px">
+          <button class="btn sm" id="wImportBtn">Import</button>
+          <button class="btn sm" id="wExport">Export</button>
+        </div>
+        <div id="wImpMsg" style="font-size:11.5px;color:var(--live);margin-bottom:6px"></div>
         <div class="tbl-wrap" style="max-height:430px">
           <table><thead><tr><th>ID</th><th>District</th><th>Domain</th><th>Belief</th></tr></thead>
           <tbody id="wTable"></tbody></table>
         </div>
       </div>
-    </div>
-    <div class="card" style="margin-top:16px">
-      <h3>LRKU quality and action card <span class="hint">turn a story into usable intelligence</span></h3>
-      <p style="font-size:13px;color:var(--muted);margin-top:0">Checks whether the lived-reality record is complete enough to use for policy, PHC action, or AI training. This prevents noisy stories from becoming unsafe intelligence.</p>
-      <button class="btn primary sm" id="wAnalyze">Analyze latest LRKU</button>
-      <button class="btn sm" id="wAnalyzeCopy">Copy action card</button>
-      <pre class="console-out mini" id="wAnalyzeOut">Click analyze after adding or selecting a field report.</pre>
     </div>
   </section>
 
@@ -196,13 +229,6 @@
         <span id="csvMsg" style="font-size:12px;color:var(--live)"></span>
       </div>
     </div>
-    <div class="card" style="margin-top:16px">
-      <h3>UPHC microplan generator <span class="hint">convert signal into field plan</span></h3>
-      <p style="font-size:13px;color:var(--muted);margin-top:0">Generates target households, ASHA field days, campaign days, trusted messenger and four field tasks for the selected district/domain.</p>
-      <button class="btn primary sm" id="sMicroRun">Generate microplan for selected domain</button>
-      <button class="btn sm" id="sMicroCopy">Copy microplan</button>
-      <pre class="console-out mini" id="sMicroOut">Select a domain and generate a microplan.</pre>
-    </div>
   </section>
 
   <!-- ---------- 03 PRAJA DARPAN ---------- -->
@@ -226,8 +252,13 @@
             <button data-iv="combined">Combined</button>
           </div>
         </div>
+        <div class="field"><label>Transmission intensity <span class="hint" id="dTransV">1.00×</span></label>
+          <input type="range" id="dTrans" min="0.5" max="2" step="0.05" value="1" style="width:100%">
+          <small style="color:var(--faint)">Set this from your local outbreak speed — left = slow spread, right = fast. The model is transparent: this multiplies the spread term, nothing hidden.</small>
+        </div>
         <div class="roi" id="dRoi"></div>
         <div class="verdict" id="dVerdict" style="display:none"></div>
+        <div id="dProv" class="hint" style="margin-top:8px;line-height:1.5"></div>
       </div>
       <div class="card">
         <h3>30-day spread <span class="hint">% of households reached by the belief</span></h3>
@@ -238,11 +269,6 @@
         </div>
         <p style="font-size:11.5px;color:var(--faint);margin:12px 0 0">Illustrative mechanistic model on real district population and capacity data. Effectiveness values are planning assumptions, not measured field outcomes.</p>
       </div>
-    </div>
-    <div class="card" style="margin-top:16px">
-      <h3>Budget optimizer <span class="hint">best intervention under a fixed rupee limit</span></h3>
-      <div class="row"><div class="field" style="max-width:220px"><label>Available budget</label><input class="input" id="dBudget" type="number" value="50000" min="0"></div><button class="btn primary sm" id="dOptRun">Find best option</button><button class="btn sm" id="dOptCopy">Copy recommendation</button></div>
-      <pre class="console-out mini" id="dOptOut">Run the optimizer after choosing a scenario.</pre>
     </div>
   </section>
 
@@ -284,12 +310,10 @@
         </div>
       </div>
     </div>
-    <div class="card" style="margin-top:16px">
-      <h3>Counter-message pack <span class="hint">ASHA audio + doctor line + SHG message</span></h3>
-      <button class="btn primary sm" id="cPackRun">Generate pack</button>
-      <button class="btn sm" id="cPackCopy">Copy pack</button>
-      <button class="btn sm" id="cPackWhats">WhatsApp pack</button>
-      <pre class="console-out mini" id="cPackOut">Classify a claim, then generate a full field-ready pack.</pre>
+    <div class="card" style="margin-top:18px">
+      <h3>Rumour library <span class="hint">real myths circulating in the field, each with a vetted Telugu reply ready to send</span></h3>
+      <input class="input" id="cRumQ" placeholder="Search myths — e.g. papaya, BP tablet, dog bite, vaccine…" style="margin-bottom:12px">
+      <div id="cRumList" class="rumlist"></div>
     </div>
   </section>
 
@@ -297,7 +321,7 @@
   <section class="panel" id="p-aarogyam" role="tabpanel">
     <div class="panel-head">
       <span class="k">05 — Deliver &amp; learn</span>
-      <h2>Aarogyam 365 — a year of action, and the loop that closes</h2>
+      <h2>Aarogyam 365 — a year of action, and the cycle that closes</h2>
       <p>One vetted prevention action per month, dispatched to a district, then measured. When field feedback comes back, the model's confidence boost rises — the system gets sharper from contact with reality. That return path is the whole point.</p>
     </div>
     <div class="card" style="margin-top:18px">
@@ -315,8 +339,9 @@
           <button class="btn primary" id="aDispatch">Dispatch campaign</button>
           <button class="btn" id="aWhats">Send on WhatsApp</button>
           <button class="btn gold" id="aFeedback">Record field feedback</button>
+          <button class="btn" id="aIcs">Export calendar (.ics)</button>
         </div>
-        <p style="font-size:12px;color:var(--muted);margin:13px 0 0">Feedback nudges <b style="color:var(--gold)">model boost</b> (top right) upward — visible proof the loop is closed.</p>
+        <p style="font-size:12px;color:var(--muted);margin:13px 0 0">Feedback nudges <b style="color:var(--gold)">model boost</b> (top right) upward — visible proof the cycle is closed.</p>
       </div>
       <div class="card">
         <h3>Campaigns <span class="hint" id="aCount">—</span></h3>
@@ -325,11 +350,6 @@
           <tbody id="aTable"></tbody></table>
         </div>
       </div>
-    </div>
-    <div class="card" style="margin-top:16px">
-      <h3>Family action checklist <span class="hint">printable / WhatsApp-ready household slip</span></h3>
-      <div class="row"><div class="field" style="max-width:220px"><label>Month</label><select class="select" id="aMonth"></select></div><button class="btn primary sm" id="aCheckRun">Generate checklist</button><button class="btn sm" id="aCheckCopy">Copy</button><button class="btn sm" id="aCheckWhats">WhatsApp</button></div>
-      <pre class="console-out mini" id="aCheckOut">Generate a district-specific family checklist.</pre>
     </div>
   </section>
 
@@ -382,6 +402,11 @@
         <h3>Safety audit log</h3>
         <div class="tbl-wrap" style="max-height:330px"><table><thead><tr><th>Audit</th><th>Level</th><th>Domain</th><th>Route</th></tr></thead><tbody id="gAudit"></tbody></table></div>
       </div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <h3>Referral &amp; danger-sign field guide <span class="hint">when to refer immediately — works offline, English + Telugu</span></h3>
+      <input class="input" id="gRefQ" placeholder="Search — e.g. dengue, pregnancy, sugar, heat, bite…" style="margin-bottom:12px">
+      <div id="gRefList" class="reflist"></div>
     </div>
   </section>
 
@@ -518,6 +543,87 @@
     </div>
   </section>
 
+  <!-- ---------- 13 AAROGYA DARPAN ---------- -->
+  <section class="panel" id="p-doctors" role="tabpanel">
+    <div class="panel-head">
+      <span class="k">13 — Verified access</span>
+      <h2>Aarogya Darpan Telangana — verified doctor map &amp; public-health access grade</h2>
+      <p>A citizen-facing doctor access network: verify before visit, find registered/claimed doctor profiles on a map, calculate a safer <b>Public Health Access Grade</b>, collect structured patient experience signals, and highlight districts where verified doctor information is missing. This is not a clinical-quality ranking and not a defamation board.</p>
+    </div>
+    <div class="banner-demo"><b>Illustrative DEMO data.</b> Every profile here is a fictional “Dr. Demo …” sample with a placeholder TSMC-DEMO number — not a real practitioner. Real verification must use the official <b>NMC National Medical Register</b> and the <b>Telangana State Medical Council</b>. This is a transparency &amp; access concept, not a clinical-quality or “best/worst doctor” ranking.</div>
+
+    <div class="grid g-5-7" style="margin-top:18px">
+      <div class="card tint">
+        <h3>Verify before visit <span class="hint">anti-quackery check</span></h3>
+        <div class="field"><label>Doctor name or registration number</label><input class="input" id="docVerifyQuery" placeholder="e.g. TSMC-DEMO-1001 or doctor name"></div>
+        <button class="btn primary" id="docVerifyBtn">Verify profile</button>
+        <div class="verify-card" id="docVerifyOut">Enter a name/registration number to check the local demo registry layer.</div>
+        <p class="help">Production should verify against official NMC/TSMC registry or an MoU/API. Demo data here is intentionally labelled.</p>
+      </div>
+      <div class="card">
+        <h3>Doctor access map</h3>
+        <div class="row" style="margin-bottom:10px">
+          <div class="field" style="max-width:260px"><label>District filter</label><select class="select" id="docDistrict"><option value="">All Telangana</option></select></div>
+          <div class="field"><label>Search</label><input class="input" id="docSearch" placeholder="speciality, clinic, name, registration"></div>
+          <button class="btn sm" id="docSearchBtn" style="align-self:end">Search</button>
+        </div>
+        <div id="doctorMap"></div>
+        <div class="legend"><span><i class="dotc" style="background:var(--live)"></i> verified/strong access</span><span><i class="dotc" style="background:var(--warn)"></i> incomplete profile</span><span><i class="dotc" style="background:var(--risk)"></i> unable to verify</span></div>
+      </div>
+    </div>
+
+    <div class="grid g-1-1-form" style="margin-top:16px">
+      <div class="card">
+        <h3>Doctor profiles <span class="hint" id="docCount">—</span></h3>
+        <div class="doctor-list" id="docList"></div>
+      </div>
+      <div class="card tint">
+        <h3>Claim / add doctor profile</h3>
+        <div class="row"><div class="field"><label>Name</label><input class="input" id="docName" placeholder="Dr. name"></div><div class="field"><label>Registration no.</label><input class="input" id="docReg" placeholder="TSMC / NMC registration"></div></div>
+        <div class="row"><div class="field"><label>District</label><select class="select" id="docAddDistrict"></select></div><div class="field"><label>Speciality</label><input class="input" id="docSpec" placeholder="General Medicine / Paediatrics / etc."></div></div>
+        <div class="field"><label>Clinic / service location</label><input class="input" id="docClinic" placeholder="Clinic name and locality"></div>
+        <div class="row"><div class="field"><label>Timings</label><input class="input" id="docTimings" placeholder="e.g. 5 PM–8 PM"></div><div class="field"><label>Languages</label><input class="input" id="docLang" value="Telugu, English"></div></div>
+        <div class="field"><label>Public-health activities / badges</label><input class="input" id="docActivities" placeholder="NCD follow-up, dengue awareness, vaccination counselling"></div>
+        <label class="checkline"><input type="checkbox" id="docVerified"> Mark as verified in demo</label>
+        <label class="checkline"><input type="checkbox" id="docPledge" checked> Responsible practice / antibiotic stewardship pledge</label>
+        <button class="btn primary" id="docAddBtn">Add claimed profile</button>
+        <span id="docAddMsg" style="font-size:12px;color:var(--live);margin-left:8px"></span>
+      </div>
+    </div>
+
+    <div class="grid g-1-1-form" style="margin-top:16px">
+      <div class="card tint">
+        <h3>Patient experience signal <span class="hint">structured, not defamatory</span></h3>
+        <div class="field"><label>Select doctor</label><select class="select" id="docFeedbackDoctor"></select></div>
+        <div class="grid mini-grid">
+          <div class="field"><label>Communication</label><input class="input" id="dfComm" type="number" min="1" max="5" value="5"></div>
+          <div class="field"><label>Respect</label><input class="input" id="dfRespect" type="number" min="1" max="5" value="5"></div>
+          <div class="field"><label>Waiting time</label><input class="input" id="dfWait" type="number" min="1" max="5" value="4"></div>
+          <div class="field"><label>Explanation</label><input class="input" id="dfExplain" type="number" min="1" max="5" value="5"></div>
+          <div class="field"><label>Follow-up advice</label><input class="input" id="dfFollow" type="number" min="1" max="5" value="4"></div>
+        </div>
+        <div class="field"><label>Private moderation note — not publicly displayed</label><input class="input" id="dfNote" placeholder="Optional staff-only note"></div>
+        <button class="btn primary" id="docFeedbackBtn">Save experience signal</button>
+        <span id="docFeedbackMsg" style="font-size:12px;color:var(--gold);margin-left:8px"></span>
+      </div>
+      <div class="card">
+        <h3>Access gaps &amp; trust cards</h3>
+        <div class="row" style="margin-bottom:10px"><button class="btn sm" id="docGapBtn">Refresh gap table</button><button class="btn gold sm" id="docCardBtn">Generate trust card</button></div>
+        <div id="docCardOut" class="trust-card-mini">Select a doctor and generate a QR-style trust card.</div>
+        <div class="tbl-wrap" style="max-height:280px;margin-top:12px"><table><thead><tr><th>District</th><th>Verified profiles</th><th>Avg score</th><th>Gap</th></tr></thead><tbody id="docGapTable"></tbody></table></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>Safe rating rules</h3>
+      <div class="rules-grid">
+        <div><b>Do show</b><br>Verified registration, clinic access, public-health badges, structured patient experience, profile completeness, Google signal only with attribution later.</div>
+        <div><b>Do not show</b><br>Worst-doctor lists, negligence allegations, anonymous defamatory comments, clinical outcome ranking, or Google-review scraping.</div>
+        <div><b>Grade meaning</b><br>A+/A/B/C means public-health access and transparency, not clinical competence.</div>
+      </div>
+    </div>
+  </section>
+
   <!-- ================= API CONSOLE ================= -->
   <section class="console">
     <div class="console-bar">
@@ -540,12 +646,141 @@
     <span>Runs fully offline · data persists in this browser · production swaps the store for Supabase with no UI change.</span>
   </footer>
 
-</main>
+    </main>
+  </div>
+</div>
+
+<!-- ================= COMMAND PALETTE ================= -->
+<div class="cmdk-overlay" id="cmdkOverlay" role="dialog" aria-modal="true" aria-label="Search modules">
+  <div class="cmdk">
+    <div class="cmdk-in"><span class="mag">⌕</span><input id="cmdkInput" type="text" placeholder="Search any module or page…" autocomplete="off" spellcheck="false"></div>
+    <div class="cmdk-list" id="cmdkList"></div>
+    <div class="cmdk-foot"><span><kbd>↑↓</kbd>navigate</span><span><kbd>↵</kbd>open</span><span><kbd>esc</kbd>close</span></div>
+  </div>
+</div>
 
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="data.js"></script>
 <script src="engine.js"></script>
 <script src="app.js"></script>
+<script>
+/* ============ Sidebar nav · appbar title · mobile drawer · ⌘K palette ============
+   Reuses app.js's existing .tab click handlers (which switch panels and set the
+   .active class). This adds the appbar title, the mobile drawer, the command
+   palette, hash sync, and the Overview-only intro (hero + pipeline). */
+(function () {
+  var sidebar = document.getElementById("sidebar");
+  if (!sidebar) return;
+  var tabs   = [].slice.call(sidebar.querySelectorAll(".tab"));
+  var abName = document.getElementById("abName");
+  var abSub  = document.getElementById("abSub");
+  var ovIntro = document.getElementById("ovIntro");
+
+  function activeTab() { return sidebar.querySelector(".tab.active") || tabs[0]; }
+  function setAppbar(btn) {
+    if (!btn) return;
+    abName.textContent = btn.getAttribute("data-name") || "";
+    abSub.textContent  = btn.getAttribute("data-sub") || "";
+  }
+  function toggleIntro() {
+    if (!ovIntro) return;
+    var a = activeTab();
+    ovIntro.style.display = (a && a.getAttribute("data-tab") === "overview") ? "" : "none";
+  }
+  function reflect() { setAppbar(activeTab()); toggleIntro(); }
+
+  tabs.forEach(function (b) {
+    b.addEventListener("click", function () {
+      setAppbar(b);
+      toggleIntro();
+      var name = b.getAttribute("data-tab");
+      if (location.hash.slice(1) !== name) history.replaceState(null, "", "#" + name);
+      document.body.classList.remove("nav-open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  /* app.js may have opened a tab from the hash before our listeners attached */
+  reflect();
+  setTimeout(reflect, 0);
+  window.addEventListener("hashchange", function () {
+    var name = location.hash.slice(1);
+    var b = name && sidebar.querySelector('.tab[data-tab="' + name + '"]');
+    if (b) b.click();
+  });
+
+  /* ---- mobile drawer ---- */
+  var burger = document.getElementById("navBurger"), scrim = document.getElementById("navScrim");
+  if (burger) burger.addEventListener("click", function () { document.body.classList.toggle("nav-open"); });
+  if (scrim)  scrim.addEventListener("click", function () { document.body.classList.remove("nav-open"); });
+
+  /* ---- command palette ---- */
+  var CATALOG = [
+    {g:"Start here", ix:"00", name:"Overview", sub:"Today\u2019s worklist & system status", tab:"overview"},
+    {g:"The cycle", ix:"01", name:"Field reports", sub:"Lived Reality \u00b7 capture what people report", tab:"world"},
+    {g:"The cycle", ix:"02", name:"Signal map", sub:"Praja Intelligence \u00b7 district risk map", tab:"praja"},
+    {g:"The cycle", ix:"03", name:"Forecast & response", sub:"Praja Darpan \u00b7 model spread, test a response", tab:"darpan"},
+    {g:"The cycle", ix:"04", name:"Rumour response", sub:"Infodemic Shield \u00b7 counter a myth in Telugu", tab:"shield"},
+    {g:"The cycle", ix:"05", name:"Prevention calendar", sub:"Aarogyam 365 \u00b7 a year of action", tab:"aarogyam"},
+    {g:"Frontline tools", ix:"06", name:"Voice kiosk", sub:"Jeevana Voice \u00b7 safe Telugu patient answers", tab:"voice"},
+    {g:"Frontline tools", ix:"12", name:"Patient triage", sub:"Patient Queue \u00b7 RED/AMBER/GREEN", tab:"patients"},
+    {g:"Frontline tools", ix:"11", name:"Patient recall", sub:"NCD Recall \u00b7 chase missed follow-ups", tab:"recall"},
+    {g:"Frontline tools", ix:"07", name:"Safety check", sub:"Safety Guard \u00b7 red-flag triage & referral", tab:"safety"},
+    {g:"Plan & coordinate", ix:"08", name:"Messenger planner", sub:"Trust Network \u00b7 pick the trusted messenger", tab:"trust"},
+    {g:"Plan & coordinate", ix:"09", name:"Task queue", sub:"PHC Ops \u00b7 accountable field tasks", tab:"ops"},
+    {g:"Plan & coordinate", ix:"10", name:"Minister brief", sub:"One-click executive summary", tab:"brief"},
+    {g:"Citizen access", ix:"13", name:"Doctor access map", sub:"Aarogya Darpan \u00b7 verify before visit", tab:"doctors"},
+    {g:"Other pages", ix:"\u25c9", name:"Control Room", sub:"Emergency early-warning dashboard", href:"ControlRoom.html", page:true},
+    {g:"Other pages", ix:"\u2211", name:"Calculators", sub:"~20 field calculators & R\u2080 estimator", href:"Calculators.html", page:true},
+    {g:"Other pages", ix:"\u2302", name:"Home", sub:"Landing page", href:"Home.html", page:true},
+    {g:"Other pages", ix:"\u229e", name:"Sitemap", sub:"Everything on one page", href:"Sitemap.html", page:true}
+  ];
+  var overlay = document.getElementById("cmdkOverlay"),
+      input   = document.getElementById("cmdkInput"),
+      list    = document.getElementById("cmdkList"),
+      sel = 0, results = [];
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+  function render(q) {
+    q = (q || "").trim().toLowerCase();
+    results = CATALOG.filter(function (it) {
+      return !q || (it.name + " " + it.sub + " " + (it.tab || "")).toLowerCase().indexOf(q) >= 0;
+    });
+    if (sel >= results.length) sel = results.length - 1;
+    if (sel < 0) sel = 0;
+    if (!results.length) { list.innerHTML = '<div class="cmdk-empty">No matches</div>'; return; }
+    var html = "", lastG = null;
+    results.forEach(function (it, i) {
+      if (it.g !== lastG) { html += '<div class="cmdk-glabel">' + esc(it.g) + '</div>'; lastG = it.g; }
+      html += '<div class="cmdk-row' + (it.page ? " page" : "") + (i === sel ? " sel" : "") + '" data-i="' + i + '">' +
+              '<span class="ix">' + esc(it.ix) + '</span>' +
+              '<span class="cmdk-tx"><b>' + esc(it.name) + '</b><span>' + esc(it.sub) + '</span></span>' +
+              (it.page ? '<span class="sub">page \u2197</span>' : '') + '</div>';
+    });
+    list.innerHTML = html;
+  }
+  function openCmdk() { overlay.classList.add("show"); input.value = ""; sel = 0; render(""); setTimeout(function(){ input.focus(); }, 30); }
+  function closeCmdk() { overlay.classList.remove("show"); }
+  function go(it) { closeCmdk(); if (it.tab) { var b = sidebar.querySelector('.tab[data-tab="' + it.tab + '"]'); if (b) b.click(); } else if (it.href) { location.href = it.href; } }
+
+  var openBtn = document.getElementById("openCmdk");
+  if (openBtn) openBtn.addEventListener("click", openCmdk);
+  document.addEventListener("keydown", function (e) {
+    if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) { e.preventDefault(); overlay.classList.contains("show") ? closeCmdk() : openCmdk(); return; }
+    if (!overlay.classList.contains("show")) return;
+    if (e.key === "Escape") closeCmdk();
+    else if (e.key === "ArrowDown") { e.preventDefault(); sel = Math.min(sel + 1, results.length - 1); render(input.value); }
+    else if (e.key === "ArrowUp")   { e.preventDefault(); sel = Math.max(sel - 1, 0); render(input.value); }
+    else if (e.key === "Enter")     { e.preventDefault(); if (results[sel]) go(results[sel]); }
+  });
+  if (input) input.addEventListener("input", function () { sel = 0; render(this.value); });
+  if (list)  list.addEventListener("click", function (e) { var r = e.target.closest(".cmdk-row"); if (r) go(results[+r.getAttribute("data-i")]); });
+  if (overlay) overlay.addEventListener("click", function (e) { if (e.target === overlay) closeCmdk(); });
+
+  /* open the palette when arriving from another page's Search button (index.html#search) */
+  if (location.hash.slice(1) === "search") { history.replaceState(null, "", location.pathname + location.search); openCmdk(); }
+})();
+</script>
 <script>
 /* PWA: offline install. Service workers need https or localhost; they no-op on file:// */
 (function () {

@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telangana Nethra — Public Health Control Room</title>
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<style>
+  :root{
+    --ink:#0A1416; --panel:#0f1c1f; --panel2:#13262a; --line:#1d3338;
+    --live:#36D6C2; --gold:#C9A24A; --txt:#e3efef; --mut:#8aa3a3;
+    --red:#E5484D; --amber:#E2A03F; --green:#3FB950;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#11242a 0,var(--ink) 55%);
+    color:var(--txt);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;padding-bottom:48px}
+  a{color:var(--live);text-decoration:none}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 18px}
+  header.top{display:flex;align-items:center;gap:14px;padding:18px 0 10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .seal{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--gold);display:grid;place-items:center;
+    color:var(--gold);font-size:20px;flex:none}
+  .ttl b{font-size:18px;letter-spacing:.2px}
+  .ttl span{display:block;color:var(--mut);font-size:12.5px;margin-top:1px}
+  .top-act{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--txt);padding:8px 13px;border-radius:9px;
+    font-size:13px;cursor:pointer;white-space:nowrap}
+  .btn:hover{border-color:var(--live)}
+  .btn.gold{border-color:var(--gold);color:var(--gold)}
+  .btn.live{border-color:var(--live);color:var(--live)}
+  .banner{background:rgba(226,160,63,.09);border:1px solid rgba(226,160,63,.32);color:#f0d9b0;
+    padding:9px 13px;border-radius:9px;font-size:12.5px;margin:14px 0}
+  .banner b{color:var(--amber)}
+  .alertstrip{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
+    border-radius:13px;padding:14px 18px;margin:6px 0 16px}
+  .bigdot{width:18px;height:18px;border-radius:50%;flex:none;box-shadow:0 0 0 4px rgba(255,255,255,.04)}
+  .alertstrip .lv{font-size:20px;font-weight:700;letter-spacing:.4px}
+  .alertstrip .sub{color:var(--mut);font-size:12.5px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px 15px;position:relative}
+  .card h3{margin:0 0 2px;font-size:14.5px;font-weight:600}
+  .card .lvrow{display:flex;align-items:center;gap:7px;margin:7px 0 6px}
+  .dot{width:10px;height:10px;border-radius:50%;flex:none}
+  .lvtxt{font-size:12px;font-weight:700;letter-spacing:.5px}
+  .metric{font-size:21px;font-weight:700;line-height:1.15}
+  .metric small{display:block;font-size:11.5px;font-weight:400;color:var(--mut);margin-top:2px}
+  .note{color:var(--mut);font-size:11.5px;margin-top:8px}
+  .chip{position:absolute;top:12px;right:12px;font-size:10px;letter-spacing:.4px;padding:3px 7px;border-radius:20px;
+    border:1px solid var(--line);color:var(--mut);text-transform:uppercase}
+  .chip.app{color:var(--live);border-color:rgba(54,214,194,.4)}
+  .chip.ill{color:var(--amber);border-color:rgba(226,160,63,.35)}
+  .sparkrow{margin-top:9px}
+  .min-only{display:none}
+  body.minview .min-only{display:block}
+  body.minview .pub-hint{display:none}
+  .sec{margin:26px 0 0}
+  .sec h2{font-size:14px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin:0 0 10px;font-weight:600}
+  .esc{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 17px}
+  .esc .ins{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+  .fld{display:flex;flex-direction:column;gap:4px}
+  .fld label{font-size:11.5px;color:var(--mut)}
+  .fld input{background:var(--ink);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:9px 11px;
+    width:150px;font-size:14px}
+  .verdict{border-radius:10px;padding:13px 15px;font-size:14px}
+  .verdict .vh{font-size:16px;font-weight:700;margin-bottom:3px}
+  .barrow{display:flex;align-items:center;gap:9px;margin:7px 0}
+  .barrow .bn{width:120px;font-size:12.5px;flex:none;color:var(--txt)}
+  .bar{flex:1;height:9px;background:#0c1a1d;border-radius:6px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:6px}
+  .barrow .bv{width:42px;text-align:right;font-size:12px;color:var(--mut);flex:none}
+  table.dt{width:100%;border-collapse:collapse;font-size:13px}
+  table.dt th,table.dt td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line)}
+  table.dt th{color:var(--mut);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px}
+  .pill{font-size:11px;font-weight:700;letter-spacing:.4px;padding:2px 8px;border-radius:20px}
+  footer.ft{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);color:var(--mut);font-size:11.5px}
+  /* overlay */
+  .ov{position:fixed;inset:0;background:rgba(6,12,13,.78);backdrop-filter:blur(3px);display:none;
+    place-items:center;z-index:50;padding:18px}
+  .ov.show{display:grid}
+  .ovbox{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:22px;max-width:420px;width:100%}
+  .ovbox h3{margin:0 0 4px;font-size:17px}
+  .ovbox p{color:var(--mut);font-size:12.5px;margin:0 0 14px}
+  .ovbox input{width:100%;background:var(--ink);border:1px solid var(--line);color:var(--txt);border-radius:9px;
+    padding:11px 13px;font-size:15px;margin-bottom:10px}
+  .ovbox .err{color:var(--red);font-size:12.5px;min-height:16px;margin-bottom:8px}
+  .ovbox .row{display:flex;gap:9px}
+  .ovbox .row .btn{flex:1;text-align:center}
+  /* ===== unified global navigation (identical on every page) ===== */
+  .gnav{position:sticky;top:0;z-index:200;background:#0A1416;border-bottom:1px solid #1A3138;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .gnav *{box-sizing:border-box}
+  .gnav-in{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:14px;height:60px;padding:0 18px}
+  .gnav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex:none}
+  .gnav-seal{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#0A1416;background:linear-gradient(135deg,#36D6C2,#1fa896);font-size:15px;flex:none}
+  .gnav-wm{display:flex;flex-direction:column;line-height:1.18}
+  .gnav-wm b{color:#E8F1F2;font-size:13.5px;letter-spacing:.2px;font-weight:700}
+  .gnav-wm>span{color:#88A2AA;font-size:10px}
+  .gnav-links{display:flex;align-items:center;gap:2px;margin-left:8px;overflow-x:auto;scrollbar-width:none}
+  .gnav-links::-webkit-scrollbar{display:none}
+  .gnav-link{display:flex;flex-direction:column;text-decoration:none;padding:7px 12px;border-radius:9px;white-space:nowrap;line-height:1.2;border:1px solid transparent}
+  .gnav-link b{color:#C2D2D5;font-size:13px;font-weight:600}
+  .gnav-link>span{color:#5C757D;font-size:10px}
+  .gnav-link:hover{background:#11242a}
+  .gnav-link:hover b{color:#E8F1F2}
+  .gnav-link.on{background:#11242a;border-color:#234047}
+  .gnav-link.on b{color:#36D6C2}
+  .gnav-search{margin-left:auto;display:flex;align-items:center;gap:7px;flex:none;text-decoration:none;background:#0F1E22;border:1px solid #234047;color:#88A2AA;font-size:12.5px;font-weight:600;padding:8px 12px;border-radius:9px;white-space:nowrap}
+  .gnav-search:hover{border-color:#36D6C2;color:#E8F1F2}
+  .gnav-search kbd{background:#0A1416;border:1px solid #234047;border-radius:5px;padding:1px 5px;font-size:10.5px;color:#88A2AA;font-family:inherit}
+  @media(max-width:860px){.gnav-wm,.gnav-link>span,.gnav-search>span{display:none}}
+  /* ===== practitioner spot map ===== */
+  .pcards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:13px}
+  .pcard{background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:11px 13px}
+  .pcard.q{border-color:rgba(229,72,77,.45)}
+  .pcard .pv{font-size:23px;font-weight:700;line-height:1.1}
+  .pcard .pl{font-size:11.5px;color:var(--mut);margin-top:3px}
+  .pfilters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .pf{display:inline-flex;align-items:center;gap:7px;background:var(--ink);border:1px solid var(--line);
+    color:var(--mut);font:inherit;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:999px;cursor:pointer}
+  .pf i{width:9px;height:9px;border-radius:50%;flex:none;opacity:.35}
+  .pf.on{color:var(--txt);border-color:#2d4a50}
+  .pf.on i{opacity:1}
+  #practMap{height:440px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#0c1a1d}
+  .plegend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;color:var(--mut)}
+  .leaflet-popup-content-wrapper,.leaflet-tooltip{font:inherit}
+  /* ===== collapse vs control simulation ===== */
+  .sim-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+  .sim-time{font-size:13px;color:var(--mut)}
+  .sim-time b{color:var(--txt);font-size:16px;font-variant-numeric:tabular-nums}
+  #simRange{flex:1;min-width:160px;accent-color:var(--live);cursor:pointer}
+  .sim-charts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .sim-chart{background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:13px 14px}
+  .sc-h b{display:block;font-size:14px}
+  .sc-h span{display:block;font-size:11.5px;color:var(--mut);margin-top:1px}
+  .sc-h.bad b{color:var(--red)} .sc-h.good b{color:var(--live)}
+  .sim-chart svg{width:100%;height:auto;display:block;margin-top:10px;overflow:visible}
+  .sim-legend{display:flex;flex-wrap:wrap;gap:7px 18px;margin:14px 0 0;font-size:12px;color:var(--mut)}
+  .sim-legend span{display:inline-flex;align-items:center;gap:7px}
+  .sim-legend i{width:14px;height:3px;border-radius:2px;flex:none}
+  .sim-readout{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  .sim-readout .ro{border-radius:11px;padding:13px 15px;font-size:12.5px;line-height:1.5}
+  .sim-readout .ro.bad{background:rgba(229,72,77,.09);border:1px solid rgba(229,72,77,.34)}
+  .sim-readout .ro.good{background:rgba(54,214,194,.08);border:1px solid rgba(54,214,194,.34)}
+  .sim-readout .ro b.h{display:block;font-size:13.5px;margin-bottom:6px}
+  .sim-readout .ro.bad b.h{color:var(--red)} .sim-readout .ro.good b.h{color:var(--live)}
+  .sim-readout .v{font-variant-numeric:tabular-nums;font-weight:700;color:var(--txt)}
+  @media(max-width:760px){.pcards{grid-template-columns:1fr 1fr}.sim-charts,.sim-readout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav class="gnav"><div class="gnav-in">
+  <a class="gnav-brand" href="Home.html" title="Home">
+    <span class="gnav-seal">నే</span>
+    <span class="gnav-wm"><b>Telangana Nethra</b><span>Public Health Intelligence</span></span>
+  </a>
+  <div class="gnav-links">
+    <a class="gnav-link" href="Home.html"><b>Home</b><span>Overview</span></a>
+    <a class="gnav-link" href="index.html"><b>Console</b><span>The workspace</span></a>
+    <a class="gnav-link on" href="ControlRoom.html"><b>Control Room</b><span>Emergency dashboard</span></a>
+    <a class="gnav-link" href="Calculators.html"><b>Calculators</b><span>Field tools &amp; R₀</span></a>
+    <a class="gnav-link" href="Sitemap.html"><b>Sitemap</b><span>Everything in one place</span></a>
+  </div>
+  <a class="gnav-search" href="index.html#search">⌕ <span>Search modules</span> <kbd>⌘K</kbd></a>
+</div></nav>
+<div class="wrap">
+
+  <header class="top">
+    <div class="seal">నే</div>
+    <div class="ttl">
+      <b>Public Health Control Room</b>
+      <span>Telangana Nethra · emergency early-warning dashboard</span>
+    </div>
+    <div class="top-act">
+      <button class="btn gold" id="accessBtn" onclick="openGate()">🔒 Minister / Official access</button>
+      <button class="btn live min-only" onclick="exitMin()">Exit to public view</button>
+    </div>
+  </header>
+
+  <div class="banner" id="demoBanner">
+    <b>Demonstration dashboard.</b> Signals shown are illustrative and are <b>not</b> a live surveillance feed.
+    Figures tagged <b>APP</b> are drawn from this tool's own demo data; all others are illustrative placeholders for how a live feed would look.
+  </div>
+
+  <!-- OVERALL ALERT -->
+  <div class="alertstrip">
+    <span class="bigdot" id="ovDot"></span>
+    <div>
+      <div class="lv" id="ovLv">—</div>
+      <div class="sub">State-wide public-health alert level · highest across all tracked domains</div>
+    </div>
+    <div style="margin-left:auto;text-align:right" class="sub" id="ovTime"></div>
+  </div>
+
+  <p class="sub pub-hint" style="color:var(--mut);font-size:12.5px;margin:-6px 0 12px">
+    Public view — summary level only. Officials can unlock full signals, R₀ estimates and the escalation log via the access button above.
+  </p>
+
+  <!-- DOMAIN GRID -->
+  <div id="ovStory" style="font-size:13px;color:var(--mut);font-style:italic;margin:2px 0 14px"></div>
+  <div class="grid" id="grid"></div>
+
+  <!-- ============ PRACTITIONER SPOT MAP ============ -->
+  <div class="sec" id="practSec">
+    <h2>Who is treating rural Telangana? <span style="color:var(--live);font-size:11px">APP DEMO</span></h2>
+    <div class="esc">
+      <p class="note" style="margin:0 0 13px;font-size:12.5px">Every dot is one practitioner. In rural blocks, unqualified practitioners — quacks &amp; non-doctor RMPs — far outnumber registered doctors. That gap is what drives unsafe antibiotic use and out-of-pocket spend, and it is exactly what this control room exists to close. <b style="color:var(--txt)">Demo data shown; in production each entry is verified and filled from the field by ASHA, ANM &amp; PHC health workers.</b></p>
+      <div class="pcards" id="practCards"></div>
+      <div class="pfilters" id="practFilters">
+        <button class="pf on" data-k="doctor"><i style="background:#36D6C2"></i>Registered doctors</button>
+        <button class="pf on" data-k="ayush"><i style="background:#C9A24A"></i>AYUSH (registered)</button>
+        <button class="pf on" data-k="quack"><i style="background:#E5484D"></i>Quacks / unregistered RMPs</button>
+        <button class="pf" data-k="__reset" style="margin-left:auto">↺ Show all</button>
+      </div>
+      <div id="practMap"></div>
+      <div class="plegend"><span id="practNote">Tap a district cluster for its breakdown.</span></div>
+    </div>
+  </div>
+
+  <!-- ============ COLLAPSE vs CONTROL SIMULATION ============ -->
+  <div class="sec" id="simSec">
+    <h2>What happens over the next 3 years? Press play <span style="color:var(--amber);font-size:11px">PROJECTION</span></h2>
+    <div class="esc">
+      <div class="sim-top">
+        <button class="btn live" id="simPlay">▶ Play the 3-year projection</button>
+        <button class="btn" id="simReset">↺ Replay</button>
+        <div class="sim-time">Month <b id="simMonth">0</b> <span>/ 36</span></div>
+        <input type="range" id="simRange" min="0" max="360" value="0" step="1">
+      </div>
+      <div class="sim-charts">
+        <div class="sim-chart">
+          <div class="sc-h bad"><b>Without a control system</b><span>quacks unchecked → public-health collapse</span></div>
+          <svg viewBox="0 0 520 240" id="simSvgBad" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="sim-chart">
+          <div class="sc-h good"><b>With Telangana Nethra control room</b><span>verify · track · act → harm contained</span></div>
+          <svg viewBox="0 0 520 240" id="simSvgGood" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+      <div class="sim-legend" id="simLegend"></div>
+      <div class="sim-readout" id="simReadout"></div>
+    </div>
+  </div>
+
+  <!-- ============ EVENT-BASED SURVEILLANCE (demo) ============ -->
+  <div class="sec" id="ebsSec">
+    <h2>Event-based surveillance — candidate signals <span style="color:var(--amber);font-size:11px">ILLUSTRATIVE</span></h2>
+    <div class="esc">
+      <p class="note" style="margin:0 0 12px">Outbreaks often surface as chatter before they reach a clinic — school-absence spikes, unusual fevers, livestock deaths. A live system would scan Telugu &amp; Urdu media and route candidates here for an epidemiologist to verify against field (Form S) signals. <b style="color:var(--txt)">Examples below are illustrative — not a live media feed.</b></p>
+      <table class="dt">
+        <thead><tr><th>Candidate signal</th><th>District</th><th>Relevance</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Spike in school absences reported</td><td>Mahbubnagar</td><td>0.72</td><td><span class="pill" style="background:#E2A03F22;color:#E2A03F">UNVERIFIED</span></td></tr>
+          <tr><td>Unusual fever chatter (Telugu posts)</td><td>Khammam</td><td>0.65</td><td><span class="pill" style="background:#36D6C222;color:#36D6C2">INVESTIGATING</span></td></tr>
+          <tr><td>“Home remedy cures dengue” post going viral</td><td>Hyderabad</td><td>0.69</td><td><span class="pill" style="background:#E2A03F22;color:#E2A03F">UNVERIFIED</span></td></tr>
+          <tr><td>Reports of livestock deaths</td><td>Adilabad</td><td>0.58</td><td><span class="pill" style="background:#3FB95022;color:#3FB950">DISMISSED</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ MINISTER-ONLY SECTIONS ============ -->
+  <div class="min-only">
+
+    <div class="sec">
+      <h2>Outbreak escalation — R₀ estimate → decision</h2>
+      <div class="esc">
+        <div class="ins">
+          <div class="fld"><label>Doubling time of cases (days) <span title="Time for case numbers to double. Shorter = faster spread." style="cursor:help;color:var(--mut);border:1px solid var(--line);border-radius:50%;font-size:10px;padding:0 5px;margin-left:3px">i</span></label><input id="wrTd" type="number" value="4" step="0.1" min="0.1"></div>
+          <div class="fld"><label>Serial / generation interval (days) <span title="Average days between one case and the next case it causes." style="cursor:help;color:var(--mut);border:1px solid var(--line);border-radius:50%;font-size:10px;padding:0 5px;margin-left:3px">i</span></label><input id="wrTg" type="number" value="5" step="0.1" min="0.1"></div>
+          <button class="btn live" onclick="escalate()">Estimate &amp; advise</button>
+        </div>
+        <div id="escOut"></div>
+        <p class="note">Method: r = ln 2 ÷ doubling time; R₀ ≈ 1 + r × serial interval. This is an estimate from the figures you enter — not a measured value. R₀ is one input only; an emergency decision also weighs case severity, hospital load and official lab confirmation.</p>
+      </div>
+    </div>
+
+    <div class="sec">
+      <h2>Resource lead-time — “Days Until Critical”</h2>
+      <div class="esc">
+        <p class="note" style="margin:0 0 12px">A warning threshold buys time. Enter a resource (e.g. emergency beds) and how fast it is filling — the room tells you how many days until it hits critical, so you act in business hours, not at 3 AM.</p>
+        <div class="ins">
+          <div class="fld"><label>Currently used</label><input id="ltNow" type="number" value="350" min="0" step="1"></div>
+          <div class="fld"><label>Total capacity</label><input id="ltCap" type="number" value="500" min="1" step="1"></div>
+          <div class="fld"><label>Filling rate / day</label><input id="ltRate" type="number" value="20" step="1"></div>
+          <div class="fld"><label>Warning at (%)</label><input id="ltWarn" type="number" value="70" min="1" max="99" step="1"></div>
+          <div class="fld"><label>Critical at (%)</label><input id="ltCrit" type="number" value="90" min="1" max="100" step="1"></div>
+          <button class="btn live" onclick="leadtime()">Calculate</button>
+        </div>
+        <div id="ltOut"></div>
+        <p class="note" style="margin-top:7px">Lead time assumes the current rate holds — a planning estimate, not a guarantee. Default: 500 beds, 350 full, +20/day → ~5 days to critical.</p>
+      </div>
+    </div>
+
+    <div class="sec">
+      <h2>Alert tiers — warning vs critical <span style="color:var(--amber);font-size:11px">REFERENCE</span></h2>
+      <div class="esc"><table class="dt">
+        <thead><tr><th>Tier</th><th>Meaning</th><th>Respond in</th><th>Channel</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill" style="background:#3FB95022;color:#3FB950">NORMAL</span></td><td>Baseline, within expected range</td><td>—</td><td>Passive logging</td></tr>
+          <tr><td><span class="pill" style="background:#E2A03F22;color:#E2A03F">WARNING</span></td><td>Degrading trend, not yet a crisis</td><td>Hours–days</td><td>Dashboard, email</td></tr>
+          <tr><td><span class="pill" style="background:#E5484D22;color:#E5484D">CRITICAL</span></td><td>Threshold breached, crisis</td><td>Minutes</td><td>SMS, paging, RRT</td></tr>
+        </tbody>
+      </table>
+      <p class="note" style="margin-top:8px">Separating warning from critical prevents alert fatigue — the system stays quiet until a trend is real, then escalates hard.</p>
+      </div>
+    </div>
+
+    <div class="sec">
+      <h2>Outbreak signal — top districts <span style="color:var(--live);font-size:11px">APP</span></h2>
+      <div class="esc" id="distBars"></div>
+    </div>
+
+    <div class="sec">
+      <h2>All domains — recommended posture</h2>
+      <div class="esc"><table class="dt" id="postureTbl"><thead><tr><th>Domain</th><th>Level</th><th>Recommended action</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="sec">
+      <h2>Recent escalation log <span style="color:var(--amber);font-size:11px">ILLUSTRATIVE</span></h2>
+      <div class="esc"><table class="dt" id="logTbl"><thead><tr><th>Date</th><th>Domain</th><th>District</th><th>Decision</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="sec">
+      <h2>Take it further</h2>
+      <div class="esc" style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="btn" href="index.html#brief">Open Minister Brief →</a>
+        <a class="btn" href="index.html">Open full console →</a>
+        <a class="btn" href="Calculators.html">Public-health calculators →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="ft">
+    Telangana Nethra — Public Health Control Room. Tracked domains: disease outbreaks, health misinformation,
+    dangerous viral health-harm challenges, screen/internet addiction, tuberculosis, NCD follow-up gaps.
+    Alert thresholds and R₀ are decision aids, not automated emergency declarations. The “Minister / Official access”
+    gate hides panels in the browser only and is <b>not</b> a security control — do not place confidential data behind it.
+    <a href="mailto:dr@jaideeprao.com?subject=Telangana%20Nethra%20feedback" style="color:var(--live)">Report an issue / feedback</a> · Educational &amp; planning use.
+  </footer>
+
+</div>
+
+<!-- ACCESS OVERLAY -->
+<div class="ov" id="gate">
+  <div class="ovbox">
+    <h3>Minister / Official access</h3>
+    <p>Enter the access word to reveal full signals, R₀ estimates and the escalation log. This is a demonstration gate — on a public site it only hides panels in your browser and is not real security.</p>
+    <input id="pcInput" type="password" placeholder="Access word" autocomplete="off" onkeydown="if(event.key==='Enter')tryGate()">
+    <div class="err" id="pcErr"></div>
+    <div class="row">
+      <button class="btn" onclick="closeGate()">Cancel</button>
+      <button class="btn gold" onclick="tryGate()">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="data.js"></script>
+<script src="engine.js"></script>
+<script>
+/* ============================================================
+   MINISTER ACCESS WORD — change this one word to set your own.
+   (Demo gate only; not real security on a public website.)
+   ============================================================ */
+var MINISTER_PASSCODE = "nethra2026";
+
+function d(id){return document.getElementById(id);}
+function api(m,r,b){try{return (window.WI&&WI.api)?WI.api(m,r,b||{}):null;}catch(e){return null;}}
+function lvlColor(l){return l==="RED"?"#E5484D":l==="AMBER"?"#E2A03F":"#3FB950";}
+function lvlRank(l){return l==="RED"?3:l==="AMBER"?2:1;}
+function lvlFromScore(s){return s>=0.66?"RED":s>=0.4?"AMBER":"GREEN";}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+
+function spark(points,color){
+  var w=120,h=32,mx=Math.max.apply(null,points),mn=Math.min.apply(null,points),rng=(mx-mn)||1;
+  var pts=points.map(function(p,i){var x=i/(points.length-1)*w;var y=h-((p-mn)/rng)*(h-6)-3;return x.toFixed(1)+","+y.toFixed(1);}).join(" ");
+  return '<svg viewBox="0 0 '+w+' '+h+'" width="100%" height="'+h+'" preserveAspectRatio="none">'+
+    '<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+}
+
+/* ---- pull real app numbers (outbreaks + NCD), fall back safely ---- */
+var sig = api("GET","/signals",{}) || [];
+var ncdSig = api("GET","/signals",{domain:"ncd"}) || [];
+var recalls = api("GET","/recalls") || [];
+var rumours = api("GET","/rumours",{}) || [];
+
+var topSig = sig[0] || {district:"—",score:0.42};
+var outbreakLvl = lvlFromScore(topSig.score||0);
+var ncdTop = ncdSig[0] || {score:0.45};
+var ncdLvl = recalls.length>0 ? (lvlRank(lvlFromScore(ncdTop.score||0))<2?"AMBER":lvlFromScore(ncdTop.score||0)) : lvlFromScore(ncdTop.score||0);
+var rebuttals = rumours.length || 0;
+
+/* ---- domain cards ---- */
+var CARDS=[
+  {name:"Disease outbreaks", app:true, level:outbreakLvl,
+   metric:Math.round((topSig.score||0)*100)+"%", sub:"top risk · "+esc(topSig.district),
+   trend:[Math.round((topSig.score||.4)*60),Math.round((topSig.score||.4)*70),58,64,Math.round((topSig.score||.4)*88),Math.round((topSig.score||.4)*92),Math.round((topSig.score||.4)*100)],
+   note:"Dengue, vaccine-preventable, maternal &amp; rabies field signals."},
+
+  {name:"Health misinformation", app:false, level:"AMBER",
+   metric:"6", sub:"rumour clusters circulating",
+   trend:[30,34,40,52,60,57,64],
+   note:rebuttals+" vetted Telugu rebuttals ready to send <span style='color:var(--live)'>(APP)</span>."},
+
+  {name:"Dangerous viral challenges", app:false, level:"AMBER",
+   metric:"3", sub:"challenge types trending",
+   trend:[8,12,18,30,27,35,43],
+   note:"Categories only (e.g. blackout/choking dares, extreme-fasting) — never named individuals."},
+
+  {name:"Screen / internet addiction", app:false, level:"AMBER",
+   metric:"~18%", sub:"adolescents screening at-risk",
+   trend:[40,42,45,47,50,53,56],
+   note:"Behavioural-health surveillance — illustrative."},
+
+  {name:"Tuberculosis", app:false, level:"GREEN",
+   metric:"63", sub:"notification index (of 100)",
+   trend:[71,69,66,67,65,64,63],
+   note:"Notifications &amp; treatment-default trend — illustrative."},
+
+  {name:"NCD follow-up gaps", app:true, level:ncdLvl,
+   metric:String(recalls.length), sub:"patients flagged for recall",
+   trend:[12,16,14,18,22,20,Math.max(8,recalls.length)],
+   note:"BP / diabetes patients overdue for follow-up."}
+];
+
+function lvlGlyph(l){return l==="RED"?"▲":l==="AMBER"?"◆":"●";}
+function render(){
+  var g=d("grid"); g.innerHTML="";
+  var maxRank=1;
+  CARDS.forEach(function(c){
+    maxRank=Math.max(maxRank,lvlRank(c.level));
+    var col=lvlColor(c.level);
+    var el=document.createElement("div"); el.className="card";
+    el.innerHTML=
+      '<span class="chip '+(c.app?'app':'ill')+'">'+(c.app?'APP':'illustrative')+'</span>'+
+      '<h3>'+esc(c.name)+'</h3>'+
+      '<div class="lvrow"><span class="dot" style="background:'+col+'"></span><span class="lvtxt" style="color:'+col+'">'+lvlGlyph(c.level)+' '+c.level+'</span></div>'+
+      '<div class="metric">'+c.metric+'<small>'+c.sub+'</small></div>'+
+      '<div class="sparkrow">'+spark(c.trend,col)+'</div>'+
+      '<div class="note">'+c.note+'</div>';
+    g.appendChild(el);
+  });
+  var ov = maxRank===3?"RED":maxRank===2?"AMBER":"GREEN";
+  d("ovDot").style.background=lvlColor(ov);
+  d("ovLv").textContent=lvlGlyph(ov)+" "+ov+(ov==="RED"?" — act now":ov==="AMBER"?" — heightened":" — routine");
+  d("ovLv").style.color=lvlColor(ov);
+  var st=d("ovStory"); if(st){ st.innerHTML="At a glance — disease-outbreak risk peaks in <b>"+esc(topSig.district)+"</b> (~"+Math.round((topSig.score||0)*100)+"%); health misinformation is <b>"+CARDS[1].level+"</b>; state-wide alert level <b>"+ov+"</b>."; }
+  var now=new Date();
+  d("ovTime").innerHTML="as of "+now.toLocaleDateString()+"<br>"+now.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+
+  // minister: district bars (APP)
+  var bars=d("distBars");
+  if(sig.length){
+    bars.innerHTML=sig.slice(0,5).map(function(s){
+      var pct=Math.round((s.score||0)*100); var col=lvlColor(lvlFromScore(s.score||0));
+      return '<div class="barrow"><span class="bn">'+esc(s.district)+'</span><span class="bar"><i style="width:'+pct+'%;background:'+col+'"></i></span><span class="bv">'+pct+'%</span></div>';
+    }).join("");
+  } else { bars.innerHTML='<span class="note">No district signals in the app yet — add field reports in the console to populate this.</span>'; }
+
+  // minister: posture table
+  var act={RED:"Issue alert · activate rapid-response team", AMBER:"Heighten surveillance · pre-position supplies", GREEN:"Routine monitoring"};
+  var pt=d("postureTbl").querySelector("tbody");
+  pt.innerHTML=CARDS.map(function(c){
+    var col=lvlColor(c.level);
+    return '<tr><td>'+esc(c.name)+'</td><td><span class="pill" style="background:'+col+'22;color:'+col+'">'+c.level+'</span></td><td>'+act[c.level]+'</td></tr>';
+  }).join("");
+
+  // minister: escalation log (illustrative)
+  var log=[
+    {dt:"2026-06-12", dom:"Dengue", dist:"Khammam", act:"Amber alert · fogging + larval survey ordered"},
+    {dt:"2026-06-08", dom:"Measles", dist:"Adilabad", act:"Catch-up immunisation drive launched"},
+    {dt:"2026-06-03", dom:"Heat", dist:"Nalgonda", act:"Public heat advisory (Telugu) issued"},
+    {dt:"2026-05-28", dom:"Screen addiction", dist:"Hyderabad", act:"School digital-wellbeing screening started"}
+  ];
+  d("logTbl").querySelector("tbody").innerHTML=log.map(function(r){
+    return '<tr><td>'+r.dt+'</td><td>'+esc(r.dom)+'</td><td>'+esc(r.dist)+'</td><td>'+esc(r.act)+'</td></tr>';
+  }).join("");
+}
+
+/* ---- R0 escalation ---- */
+function escalate(){
+  var td=parseFloat(d("wrTd").value), tg=parseFloat(d("wrTg").value);
+  var o=d("escOut");
+  if(!(td>0)||!(tg>0)){ o.innerHTML='<div class="verdict" style="background:#1a2a2e;color:var(--mut)">Enter a doubling time and serial interval greater than 0.</div>'; return; }
+  var r=Math.log(2)/td, R=1+r*tg, lvl, rec;
+  if(R>=1.3){lvl="RED"; rec="Spreading fast. <b>Consider a public-health emergency alert</b> and rapid-response deployment.";}
+  else if(R>1){lvl="AMBER"; rec="Growing. Escalate surveillance and prepare an alert; re-check in 48–72 hours.";}
+  else {lvl="GREEN"; rec="Not spreading on these figures. Continue routine monitoring.";}
+  var col=lvlColor(lvl);
+  o.innerHTML='<div class="verdict" style="background:'+col+'1a;border:1px solid '+col+'55">'+
+    '<div class="vh" style="color:'+col+'">Estimated R₀ ≈ '+R.toFixed(2)+' · '+lvl+'</div>'+
+    '<div>'+rec+'</div>'+
+    '<div class="note" style="margin-top:7px">Daily growth rate r ≈ '+r.toFixed(3)+'/day. '+(R>1?"Each case is infecting more than one other.":"Each case is infecting fewer than one other.")+'</div></div>';
+}
+
+/* ---- resource lead-time: Days Until Critical ---- */
+function leadtime(){
+  var now=parseFloat(d("ltNow").value), cap=parseFloat(d("ltCap").value), rate=parseFloat(d("ltRate").value);
+  var wp=parseFloat(d("ltWarn").value)/100, cp=parseFloat(d("ltCrit").value)/100;
+  var o=d("ltOut");
+  if(!(cap>0)||!(now>=0)||isNaN(rate)||!(wp>0)||!(cp>0)){ o.innerHTML='<div class="verdict" style="background:#1a2a2e;color:var(--mut)">Enter a capacity above 0, a current amount, and thresholds.</div>'; return; }
+  var pct=now/cap, warnN=wp*cap, critN=cp*cap;
+  var lvl = pct>=cp?"RED" : pct>=wp?"AMBER" : "GREEN";
+  var col=lvlColor(lvl);
+  var head = lvl==="RED"?"CRITICAL \u2014 threshold already breached" : lvl==="AMBER"?"WARNING \u2014 degrading" : "NORMAL \u2014 within range";
+  var lines=["Now at <b>"+Math.round(pct*100)+"%</b> ("+Math.round(now)+" / "+Math.round(cap)+")."];
+  if(rate>0){
+    var dCrit=(critN-now)/rate, dWarn=(warnN-now)/rate;
+    lines.push(dCrit>0 ? "At +"+rate+"/day, <b>critical in "+dCrit.toFixed(1)+" days</b>." : "Already at or past the critical line.");
+    if(dWarn>0) lines.push("Warning line in "+dWarn.toFixed(1)+" days.");
+  } else if(rate<0){ lines.push("Declining \u2014 moving away from critical."); }
+  else { lines.push("Flat \u2014 no change at the current rate."); }
+  var rec = lvl==="RED"?"Activate diversion / field capacity now; notify the rapid-response team." : lvl==="AMBER"?"Inventory supplies, pre-position staff and prepare diversion \u2014 during business hours." : "Routine monitoring.";
+  o.innerHTML='<div class="verdict" style="background:'+col+'1a;border:1px solid '+col+'55">'+
+    '<div class="vh" style="color:'+col+'">'+head+'</div><div>'+lines.join(" ")+'</div>'+
+    '<div class="note" style="margin-top:7px">'+rec+'</div></div>';
+}
+
+/* ---- access gate ---- */
+function openGate(){ d("gate").classList.add("show"); d("pcErr").textContent=""; d("pcInput").value=""; setTimeout(function(){d("pcInput").focus();},50); }
+function closeGate(){ d("gate").classList.remove("show"); }
+function tryGate(){
+  var v=(d("pcInput").value||"").trim().toLowerCase();
+  if(v===MINISTER_PASSCODE.toLowerCase()){
+    try{sessionStorage.setItem("tn_minview","1");}catch(e){}
+    document.body.classList.add("minview"); closeGate();
+    try{ var b=d("demoBanner"); if(b&&b.scrollIntoView) b.scrollIntoView({behavior:"smooth",block:"start"}); }catch(e){}
+  } else { d("pcErr").textContent="Incorrect access word."; }
+}
+function exitMin(){ try{sessionStorage.removeItem("tn_minview");}catch(e){} document.body.classList.remove("minview"); }
+
+/* restore session */
+try{ if(sessionStorage.getItem("tn_minview")==="1") document.body.classList.add("minview"); }catch(e){}
+render();
+leadtime();
+</script>
+
+<script>
+/* ============================================================
+   MINISTER DEMO — practitioner spot map + 3-year projection
+   Self-contained: reads window.__WI_SEED.districts (from data.js).
+   ============================================================ */
+(function(){
+  var SEED = (window.__WI_SEED && window.__WI_SEED.districts) || [];
+  if(!SEED.length) return;
+  var COL = { doctor:"#36D6C2", ayush:"#C9A24A", quack:"#E5484D" };
+
+  /* seeded RNG so jitter is stable across redraws */
+  function rng(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; var t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+
+  /* per-district illustrative counts: urban → more doctors, rural → more quacks */
+  function counts(d){
+    var popK=d.population/100000, u=d.urbanization, trust=(d.capacity&&d.capacity.doctor_trust)||0.6;
+    return {
+      doctor: Math.max(1, Math.round(popK*(0.25+1.05*u)*(0.6+0.5*trust))),
+      ayush:  Math.max(1, Math.round(popK*(0.35+0.55*(1-u)))),
+      quack:  Math.max(2, Math.round(popK*(0.55+2.35*(1-u))))
+    };
+  }
+  var DCAP=22; // max dots drawn per category per district (counts in tooltip stay exact)
+  var totals={doctor:0,ayush:0,quack:0}, rows=[];
+  SEED.forEach(function(d,i){ var c=counts(d); rows.push({d:d,c:c}); totals.doctor+=c.doctor; totals.ayush+=c.ayush; totals.quack+=c.quack; });
+
+  /* ---- summary cards ---- */
+  function fmt(n){ return n>=1000? (n/1000).toFixed(n>=10000?0:1)+"k" : String(n); }
+  var ratio=(totals.quack/Math.max(1,totals.doctor));
+  document.getElementById("practCards").innerHTML=
+    '<div class="pcard"><div class="pv" style="color:#36D6C2">'+fmt(totals.doctor)+'</div><div class="pl">registered doctors (MBBS+)</div></div>'+
+    '<div class="pcard"><div class="pv" style="color:#C9A24A">'+fmt(totals.ayush)+'</div><div class="pl">registered AYUSH doctors</div></div>'+
+    '<div class="pcard q"><div class="pv" style="color:#E5484D">'+fmt(totals.quack)+'</div><div class="pl">quacks / unregistered RMPs</div></div>'+
+    '<div class="pcard q"><div class="pv" style="color:#E5484D">'+ratio.toFixed(1)+'\u00d7</div><div class="pl">quacks per registered doctor</div></div>';
+
+  /* ---- leaflet spot map ---- */
+  var map, layers={doctor:null,ayush:null,quack:null}, shown={doctor:true,ayush:true,quack:true};
+  function dots(kind){
+    var grp=L.layerGroup();
+    rows.forEach(function(r,i){
+      var n=Math.min(r.c[kind], DCAP), rnd=rng((i+1)*(kind==="doctor"?7:kind==="ayush"?13:23));
+      for(var k=0;k<n;k++){
+        var ang=rnd()*Math.PI*2, rad=Math.sqrt(rnd())*(0.10+r.d.urbanization*0.06+(kind==="quack"?0.04:0));
+        var lat=r.d.lat+Math.sin(ang)*rad, lon=r.d.lon+Math.cos(ang)*rad*1.05;
+        var m=L.circleMarker([lat,lon],{radius:kind==="quack"?3.4:3.8,color:COL[kind],fillColor:COL[kind],fillOpacity:.62,weight:0,interactive:false});
+        grp.addLayer(m);
+      }
+      // one invisible clickable anchor per district for the breakdown tooltip
+    });
+    return grp;
+  }
+  function initMap(){
+    if(typeof L==="undefined"){ document.getElementById("practNote").textContent="map library unavailable"; return; }
+    map=L.map("practMap",{scrollWheelZoom:false,attributionControl:false}).setView([17.9,79.2],7);
+    var tiles=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:11,opacity:.38});
+    tiles.on("tileerror",function(){ document.getElementById("practNote").textContent="offline \u2014 basemap hidden, practitioner dots still shown"; });
+    tiles.addTo(map);
+    layers.doctor=dots("doctor").addTo(map);
+    layers.ayush=dots("ayush").addTo(map);
+    layers.quack=dots("quack").addTo(map);
+    // district label markers with full breakdown
+    rows.forEach(function(r){
+      L.circleMarker([r.d.lat,r.d.lon],{radius:5,color:"#0A1416",fillColor:"#0A1416",fillOpacity:0,weight:0})
+        .bindTooltip('<b>'+r.d.district+'</b><br>Registered doctors: '+r.c.doctor+'<br>AYUSH: '+r.c.ayush+'<br><span style="color:#E5484D">Quacks/RMPs: '+r.c.quack+'</span>',{direction:"top"})
+        .addTo(map);
+    });
+    setTimeout(function(){ try{map.invalidateSize();}catch(e){} },120);
+  }
+  initMap();
+
+  document.getElementById("practFilters").addEventListener("click",function(e){
+    var b=e.target.closest(".pf"); if(!b||!map) return;
+    var k=b.getAttribute("data-k");
+    if(k==="__reset"){ ["doctor","ayush","quack"].forEach(function(kk){ shown[kk]=true; try{layers[kk].addTo(map);}catch(_){} }); document.querySelectorAll("#practFilters .pf").forEach(function(x){ if(x.getAttribute("data-k")!=="__reset") x.classList.add("on"); }); return; }
+    shown[k]=!shown[k]; b.classList.toggle("on",shown[k]);
+    if(shown[k]) layers[k].addTo(map); else map.removeLayer(layers[k]);
+  });
+
+  /* ============ 3-YEAR PROJECTION ============ */
+  var M=36;
+  function easeIn(t){ return Math.pow(t,1.7); }
+  function easeOut(t){ return 1-Math.pow(1-t,2); }
+  function series(a,b,f){ var o=[]; for(var m=0;m<=M;m++){ var t=m/M; o.push(a+(b-a)*f(t)); } return o; }
+  // index 0-100. harm metrics: higher = worse. trust: higher = better.
+  var METRICS=[
+    {key:"amr",  label:"Antimicrobial resistance", col:"#E5484D"},
+    {key:"oop",  label:"Out-of-pocket health spend", col:"#E2A03F"},
+    {key:"debt", label:"Families in catastrophic debt", col:"#C879E6"},
+    {key:"trust",label:"Trust in public health", col:"#36D6C2"}
+  ];
+  var BAD={ amr:series(28,86,easeIn), oop:series(40,82,function(t){return Math.pow(t,1.4);}), debt:series(20,73,function(t){return Math.pow(t,1.5);}), trust:series(60,21,function(t){return Math.pow(t,0.85);}) };
+  var GOOD={ amr:series(28,31,easeOut), oop:series(40,27,easeOut), debt:series(20,13,easeOut), trust:series(60,85,easeOut) };
+
+  var PAD={l:34,r:14,t:14,b:24}, W=520, H=240;
+  function X(m){ return PAD.l + (m/M)*(W-PAD.l-PAD.r); }
+  function Y(v){ return PAD.t + (1-v/100)*(H-PAD.t-PAD.b); }
+
+  function chartBase(){
+    var s='';
+    [0,25,50,75,100].forEach(function(g){ var y=Y(g);
+      s+='<line x1="'+PAD.l+'" y1="'+y+'" x2="'+(W-PAD.r)+'" y2="'+y+'" stroke="#1d3338" stroke-width="1"/>';
+      s+='<text x="'+(PAD.l-6)+'" y="'+(y+3)+'" fill="#5f7a7a" font-size="9" text-anchor="end">'+g+'</text>';
+    });
+    [0,12,24,36].forEach(function(m){ s+='<text x="'+X(m)+'" y="'+(H-7)+'" fill="#5f7a7a" font-size="9" text-anchor="middle">'+m+'</text>'; });
+    return s;
+  }
+  function val(arr,prog){ var k=Math.floor(prog), f=prog-k; if(k>=M) return arr[M]; return arr[k]+(arr[k+1]-arr[k])*f; }
+  function linePath(arr,prog){
+    var pts=[], k=Math.floor(prog), m;
+    for(m=0;m<=k && m<=M;m++) pts.push(X(m).toFixed(1)+","+Y(arr[m]).toFixed(1));
+    if(prog<M){ pts.push(X(prog).toFixed(1)+","+Y(val(arr,prog)).toFixed(1)); }
+    return pts;
+  }
+  function drawScenario(svg, data, prog){
+    var s=chartBase();
+    METRICS.forEach(function(mt){
+      var pts=linePath(data[mt.key],prog);
+      s+='<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+mt.col+'" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
+      var last=pts[pts.length-1].split(","); 
+      s+='<circle cx="'+last[0]+'" cy="'+last[1]+'" r="3.2" fill="'+mt.col+'"/>';
+    });
+    // time cursor
+    s+='<line x1="'+X(prog)+'" y1="'+PAD.t+'" x2="'+X(prog)+'" y2="'+(H-PAD.b)+'" stroke="#ffffff" stroke-opacity="0.16" stroke-width="1"/>';
+    svg.innerHTML=s;
+  }
+  function readout(prog){
+    function row(data,cls,head,verdict){
+      function v(k){ return Math.round(val(data[k],prog)); }
+      return '<div class="ro '+cls+'"><b class="h">'+head+'</b>'+
+        'AMR <span class="v">'+v("amr")+'</span> \u00b7 out-of-pocket <span class="v">'+v("oop")+'</span> \u00b7 families in debt <span class="v">'+v("debt")+'</span> \u00b7 trust <span class="v">'+v("trust")+'</span><br><span style="color:var(--mut)">'+verdict+'</span></div>';
+    }
+    document.getElementById("simReadout").innerHTML=
+      row(BAD,"bad","Without a control system", prog>=M?"Antibiotics fail, families are pushed into debt, and trust in public health has collapsed.":"Harm rising as unregulated care spreads\u2026")+
+      row(GOOD,"good","With Telangana Nethra", prog>=M?"Verified practitioners, tracked antibiotics and trusted Telugu action keep every harm curve flat.":"Control system holding the line\u2026");
+  }
+  function legend(){
+    document.getElementById("simLegend").innerHTML=METRICS.map(function(m){ return '<span><i style="background:'+m.col+'"></i>'+m.label+'</span>'; }).join("");
+  }
+  legend();
+
+  var bad=document.getElementById("simSvgBad"), good=document.getElementById("simSvgGood"),
+      range=document.getElementById("simRange"), monthEl=document.getElementById("simMonth"),
+      playBtn=document.getElementById("simPlay"), resetBtn=document.getElementById("simReset");
+  function frame(prog){
+    prog=Math.max(0,Math.min(M,prog));
+    drawScenario(bad,BAD,prog); drawScenario(good,GOOD,prog);
+    monthEl.textContent=Math.round(prog);
+    range.value=Math.round(prog*10);
+    readout(prog);
+  }
+  frame(0);
+
+  var anim=null, t0=0, DUR=7000;
+  function stop(){ if(anim){ cancelAnimationFrame(anim); anim=null; } }
+  function play(){
+    stop();
+    var startProg=(+range.value/10>=M)?0:(+range.value/10);
+    t0=performance.now()-(startProg/M)*DUR;
+    playBtn.textContent="\u275a\u275a Pause"; playBtn.classList.add("playing");
+    function tick(now){
+      var prog=Math.min(M,((now-t0)/DUR)*M);
+      frame(prog);
+      if(prog<M){ anim=requestAnimationFrame(tick); }
+      else { stop(); playBtn.textContent="\u25b6 Play again"; playBtn.classList.remove("playing"); }
+    }
+    anim=requestAnimationFrame(tick);
+  }
+  playBtn.addEventListener("click",function(){ if(anim){ stop(); playBtn.textContent="\u25b6 Resume"; playBtn.classList.remove("playing"); } else { play(); } });
+  resetBtn.addEventListener("click",function(){ stop(); playBtn.textContent="\u25b6 Play the 3-year projection"; playBtn.classList.remove("playing"); frame(0); });
+  range.addEventListener("input",function(){ stop(); playBtn.textContent="\u25b6 Play the 3-year projection"; playBtn.classList.remove("playing"); frame(+range.value/10); });
+})();
+</script>
+</body>
+</html>

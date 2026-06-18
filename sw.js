@@ -1,7 +1,7 @@
-/* World Intelligence — service worker (offline app shell) */
-var CACHE = "wi-cache-v2";
+/* Telangana Nethra — service worker (offline app shell) */
+var CACHE = "wi-cache-v7-cycle";
 var ASSETS = [
-  "./", "index.html", "styles.css", "data.js", "engine.js", "app.js", "manifest.json",
+  "./", "index.html", "Home.html", "Calculators.html", "ControlRoom.html", "Sitemap.html", "styles.css", "data.js", "engine.js", "app.js", "manifest.json",
   "vendor/leaflet/leaflet.js", "vendor/leaflet/leaflet.css",
   "icons/icon-192.png", "icons/icon-512.png"
 ];

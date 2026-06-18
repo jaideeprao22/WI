@@ -1,5 +1,5 @@
 /* ============================================================
-   World Intelligence — UI layer
+   Telangana Nethra — UI layer
    Binds the page to window.WI (the engine). No frameworks, no
    build step, no fetch — works on file:// and on GitHub Pages.
    ============================================================ */
@@ -31,7 +31,6 @@
   ["wDomain", "sDomain", "dDomain", "aDomain", "tDomain", "oDomain"].forEach(function (id) { if($(id)) fillDomains($(id)); });
   $("dSeed").value = "TS24";        // Rangareddy
   $("aDistrict").value = "TS24";
-  if ($("aMonth")) { $("aMonth").innerHTML = WI.actions().map(function(a){ return "<option value='" + esc(a.month) + "'>" + esc(a.month + " — " + a.title) + "</option>"; }).join(""); }
 
   /* ============================================================
      STATE + OVERVIEW
@@ -56,7 +55,7 @@
   }
   function renderEvents() {
     var ev = WI.api("GET", "/events");
-    if (!ev.length) { $("ovEvents").innerHTML = '<tr><td colspan="3" style="color:var(--faint)">No activity yet — run the loop or add a report.</td></tr>'; return; }
+    if (!ev.length) { $("ovEvents").innerHTML = '<tr><td colspan="3" style="color:var(--faint)">No activity yet — run the cycle or add a report.</td></tr>'; return; }
     $("ovEvents").innerHTML = ev.slice(0, 18).map(function (e) {
       var t = new Date(e.t).toLocaleTimeString("en-IN", { hour12: false });
       return "<tr><td style='color:var(--faint)'>" + t + '</td><td><span class="dom">' + esc(e.type) + "</span></td><td>" + esc(e.detail) + "</td></tr>";
@@ -145,10 +144,16 @@
 
   function runForecast() {
     var domain = $("dDomain").value, seed = $("dSeed").value;
-    var f = WI.api("POST", "/forecast", { domain: domain, seedDistrict: seed, intervention: curIv, days: 30 });
+    var trans = $("dTrans") ? +$("dTrans").value : 1;
+    if ($("dTransV")) $("dTransV").textContent = trans.toFixed(2) + "×";
+    var f = WI.api("POST", "/forecast", { domain: domain, seedDistrict: seed, intervention: curIv, days: 30, params: { trans: trans } });
     $("dKeySel").textContent = IV_NAME[curIv];
     drawChart(f.baseline, f.selected);
     drawRoi(f);
+    if ($("dProv")) {
+      var cf = trans >= 1.4 ? "lower" : (trans <= 0.7 ? "higher" : "moderate");
+      $("dProv").innerHTML = '<b style="color:var(--gold)">Prediction · confidence: ' + cf + '</b> — illustrative model. Based on: seed-district population, recent field signals, spread to 8 neighbours, seasonality, transmission ×' + trans.toFixed(2) + '. Not a validated forecast.';
+    }
   }
 
   function drawChart(base, sel) {
@@ -396,7 +401,7 @@
       if (i === 4) {
         clearInterval(timer);
         var run = WI.api("POST", "/loop/run", {});
-        $("pipeOut").innerHTML = "<b>Loop complete.</b> Signal in <b>" + esc(run.seed) + "</b> classified as <span class='tag'>" +
+        $("pipeOut").innerHTML = "<b>Cycle complete.</b> Signal in <b>" + esc(run.seed) + "</b> classified as <span class='tag'>" +
           esc(run.domain) + "</span> → no-action forecast <b>" + run.forecast.no_action_pct + "%</b> vs combined <b>" +
           run.forecast.combined_pct + "%</b>, protecting ~<b>" + fmt(run.forecast.households_protected) +
           " households</b> → dispatched via <b>" + esc(run.act.messenger) + "</b>, reached <b>" + fmt(run.deliver.reached) +
@@ -419,6 +424,7 @@
       [].forEach.call(document.querySelectorAll(".panel"), function (p) { p.classList.remove("show"); });
       $("p-" + b.getAttribute("data-tab")).classList.add("show");
       if (b.getAttribute("data-tab") === "praja" && map) setTimeout(function () { map.invalidateSize(); updateMap($("sDomain").value); }, 60);
+      if (b.getAttribute("data-tab") === "doctors" && doctorMap) setTimeout(function () { doctorMap.invalidateSize(); updateDoctorMap(currentDoctorRows); }, 80);
     });
   });
 
@@ -442,54 +448,9 @@
     if ($("csvMsg")) $("csvMsg").textContent = "";
     $("apiOut").textContent = "// session data cleared — seed data restored";
     nodes.forEach(function (n) { n.classList.remove("on"); });
-    $("pipeOut").innerHTML = "Press <b>Run the full loop</b> to send one real field signal through all five stages.";
+    $("pipeOut").innerHTML = "Press <b>Run the full cycle</b> to send one real field signal through all five stages.";
   });
   $("apiExport").addEventListener("click", function () { WI.export(); });
-
-  /* ============================================================
-     2x PRACTICAL UTILITIES ACROSS THE FIVE CORE DOMAINS
-     ============================================================ */
-  var lastActionCard = "", lastMicro = "", lastOpt = "", lastPack = "", lastChecklist = "";
-  function asBullets(arr) { return (arr || []).map(function (x) { return "- " + x; }).join("\n"); }
-  if ($("wAnalyze")) $("wAnalyze").addEventListener("click", function () {
-    var r = WI.api("POST", "/lrku/analyze", {});
-    lastActionCard = "LRKU QUALITY CARD\n" +
-      "ID: " + r.id + "\nDistrict: " + r.district + "\nDetected domain: " + r.detected_domain + "\nQuality score: " + r.quality_score + "%\nRisk type: " + r.risk_type + "\nMissing fields: " + (r.missing.length ? r.missing.join(", ") : "none") + "\nUses:\n" + asBullets(r.recommended_use) + "\nAction: " + r.action_card;
-    $("wAnalyzeOut").textContent = lastActionCard;
-  });
-  if ($("wAnalyzeCopy")) $("wAnalyzeCopy").addEventListener("click", function () { copyText(lastActionCard, $("wAnalyzeOut")); });
-
-  if ($("sMicroRun")) $("sMicroRun").addEventListener("click", function () {
-    var domain = $("sDomain").value; var top = WI.api("GET", "/signals", { domain: domain })[0];
-    var r = WI.api("POST", "/praja/microplan", { domain: domain, districtId: top.id });
-    lastMicro = "UPHC MICROPLAN\nDistrict: " + r.district + "\nDomain: " + r.domain + "\nSignal: " + Math.round(r.signal*100) + "%\nTarget households: " + fmt(r.target_households) + "\nEstimated ASHA field-days: " + r.estimated_asha_field_days + "\nCampaign days: " + r.camp_days + "\nMessenger: " + r.messenger.key + "\n\nTasks:\n" + asBullets(r.tasks) + "\n\nTelugu message:\n" + r.telugu_message;
-    $("sMicroOut").textContent = lastMicro;
-  });
-  if ($("sMicroCopy")) $("sMicroCopy").addEventListener("click", function () { copyText(lastMicro, $("sMicroOut")); });
-
-  if ($("dOptRun")) $("dOptRun").addEventListener("click", function () {
-    var r = WI.api("POST", "/darpan/optimize", { domain: $("dDomain").value, districtId: $("dSeed").value, budget: $("dBudget").value });
-    lastOpt = "BUDGET OPTIMIZER\nDistrict: " + r.district + "\nDomain: " + r.domain + "\nBudget: " + rupee(r.budget) + "\nBest intervention: " + r.best.intervention + "\nHouseholds protected: " + fmt(r.best.households_protected) + "\nCost: " + rupee(r.best.cost) + "\nCost/protected household: " + rupee(r.best.cost_per_household || 0) + "\nRecommendation: " + r.recommendation + "\n\nOptions:\n" + r.options.map(function(o){ return "- " + o.intervention + ": " + fmt(o.households_protected) + " protected, " + rupee(o.cost) + (o.affordable ? "" : " [over budget]"); }).join("\n");
-    $("dOptOut").textContent = lastOpt;
-  });
-  if ($("dOptCopy")) $("dOptCopy").addEventListener("click", function () { copyText(lastOpt, $("dOptOut")); });
-
-  if ($("cPackRun")) $("cPackRun").addEventListener("click", function () {
-    var top = WI.api("GET", "/signals", { domain: lastDomain || "dengue" })[0] || { id: "TS24" };
-    var r = WI.api("POST", "/shield/pack", { text: $("cText").value, districtId: top.id });
-    lastPack = "INFODEMIC COUNTER-PACK\nDistrict: " + r.district + "\nDomain: " + r.domain + "\nRisk: " + r.risk_type + "\nBest messenger: " + r.best_messenger.key + "\n\nPre-bunk checklist:\n" + asBullets(r.pre_bunk) + "\n\nMessages:\n" + r.variants.map(function(v){ return v.channel + ": " + v.telugu; }).join("\n\n");
-    $("cPackOut").textContent = lastPack;
-  });
-  if ($("cPackCopy")) $("cPackCopy").addEventListener("click", function(){ copyText(lastPack, $("cPackOut")); });
-  if ($("cPackWhats")) $("cPackWhats").addEventListener("click", function(){ openWA(lastPack); });
-
-  if ($("aCheckRun")) $("aCheckRun").addEventListener("click", function () {
-    var r = WI.api("POST", "/aarogyam/checklist", { domain: $("aDomain").value, districtId: $("aDistrict").value, month: $("aMonth").value });
-    lastChecklist = r.printable_slip + "\n\nFeedback questions:\n- " + r.feedback_questions.join("\n- ");
-    $("aCheckOut").textContent = lastChecklist;
-  });
-  if ($("aCheckCopy")) $("aCheckCopy").addEventListener("click", function(){ copyText(lastChecklist, $("aCheckOut")); });
-  if ($("aCheckWhats")) $("aCheckWhats").addEventListener("click", function(){ openWA(lastChecklist); });
 
   /* ============================================================
      REAL DISPATCH — WhatsApp / copy (no backend, works on a phone)
@@ -626,7 +587,7 @@
     recalls.slice(0, 3).forEach(function (r) { items.push({ pri: 3, tag: "recall", color: "var(--gold)", text: fmt(r.count) + " NCD patients to recall", where: r.district }); });
     sig.forEach(function (s) { if (s.score >= 0.66) items.push({ pri: 4, tag: "signal", color: "var(--risk)", text: "High signal — direct attention", where: s.district + " · " + pct(s.score) }); });
     items.sort(function (a, b) { return a.pri - b.pri; });
-    if (!items.length) { $("todayList").innerHTML = "<div style='color:var(--faint);font-size:13px'>Nothing outstanding right now. Register a patient, run the loop, or generate a recall to populate the worklist.</div>"; return; }
+    if (!items.length) { $("todayList").innerHTML = "<div style='color:var(--faint);font-size:13px'>Nothing outstanding right now. Register a patient, run the cycle, or generate a recall to populate the worklist.</div>"; return; }
     $("todayList").innerHTML = items.slice(0, 10).map(function (it) {
       return "<div class='wl-row'><span class='wl-tag' style='color:" + it.color + ";border-color:" + it.color + "'>" + esc(it.tag) + "</span><span class='wl-text'>" + esc(it.text) + "</span><span class='wl-where'>" + esc(it.where) + "</span></div>";
     }).join("");
@@ -655,6 +616,190 @@
   if ($("pWhats")) $("pWhats").addEventListener("click", function () { if (lastPt) openWA((lastPt.advice_telugu || "") + "\n\n" + (lastPt.message_telugu || "")); });
 
   /* ============================================================
+     DEPTH — rumour library · referral guide · bank tools · calendar
+     ============================================================ */
+  function cpText(t, btn) { try { navigator.clipboard.writeText(t); } catch (e) {} if (btn) { var o = btn.textContent; btn.textContent = "Copied"; setTimeout(function () { btn.textContent = o; }, 1100); } }
+  function splitCsv(line) {
+    var out = [], cur = "", q = false;
+    for (var i = 0; i < line.length; i++) { var ch = line[i];
+      if (q) { if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; } else if (ch === '"') q = false; else cur += ch; }
+      else { if (ch === '"') q = true; else if (ch === ",") { out.push(cur); cur = ""; } else cur += ch; } }
+    out.push(cur); return out;
+  }
+
+  function renderRumours() {
+    if (!$("cRumList")) return;
+    var rows = WI.api("GET", "/rumours", { q: $("cRumQ") ? $("cRumQ").value : "" });
+    if (!rows.length) { $("cRumList").innerHTML = "<div style='color:var(--faint);font-size:13px'>No myths match that search.</div>"; return; }
+    $("cRumList").innerHTML = rows.map(function (r, i) {
+      return "<div class='rum'><div class='rum-h'><span class='dom'>" + esc(DOM_LABEL[r.domain] || r.domain) + "</span><span class='rum-m'>\u201C" + esc(r.myth) + "\u201D</span></div>" +
+        "<div class='rum-t'><b>Reality:</b> " + esc(r.truth) + "</div><div class='te'>" + esc(r.te) + "</div>" +
+        "<div class='rum-b'><button class='btn sm wa-rum' data-i='" + i + "'>WhatsApp</button><button class='btn sm cp-rum' data-i='" + i + "'>Copy reply</button></div></div>";
+    }).join("");
+    function txt(i) { var r = rows[i]; return r.te + "\n\n(" + r.truth + ")"; }
+    [].forEach.call(document.querySelectorAll(".wa-rum"), function (b) { b.addEventListener("click", function () { openWA(txt(+this.getAttribute("data-i"))); }); });
+    [].forEach.call(document.querySelectorAll(".cp-rum"), function (b) { b.addEventListener("click", function () { cpText(txt(+this.getAttribute("data-i")), this); }); });
+  }
+
+  function renderReferral() {
+    if (!$("gRefList")) return;
+    var rows = WI.api("GET", "/referral", { q: $("gRefQ") ? $("gRefQ").value : "" });
+    if (!rows.length) { $("gRefList").innerHTML = "<div style='color:var(--faint);font-size:13px'>No guide matches that search.</div>"; return; }
+    $("gRefList").innerHTML = rows.map(function (g, i) {
+      return "<div class='ref'><div class='ref-h'><span class='dom'>" + esc(DOM_LABEL[g.domain] || g.domain) + "</span><b>" + esc(g.title) + "</b></div>" +
+        "<ul class='ref-l'>" + g.signs.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ul><div class='te'>" + esc(g.te) + "</div>" +
+        "<div class='ref-b'><button class='btn sm wa-ref' data-i='" + i + "'>Send Telugu</button></div></div>";
+    }).join("");
+    [].forEach.call(document.querySelectorAll(".wa-ref"), function (b) { b.addEventListener("click", function () { openWA(rows[+this.getAttribute("data-i")].te); }); });
+  }
+  if ($("cRumQ")) $("cRumQ").addEventListener("input", renderRumours);
+  if ($("gRefQ")) $("gRefQ").addEventListener("input", renderReferral);
+
+  if ($("wSearch")) $("wSearch").addEventListener("input", function () {
+    var q = this.value.toLowerCase();
+    [].forEach.call($("wTable").querySelectorAll("tr"), function (tr) { tr.style.display = tr.textContent.toLowerCase().indexOf(q) >= 0 ? "" : "none"; });
+  });
+  if ($("wExport")) $("wExport").addEventListener("click", function () {
+    var rows = WI.api("GET", "/lrkus");
+    var csv = "district,domain,contributor,belief,situation,risk\n" + rows.map(function (l) {
+      return [l.district, l.domain, l.contributor, l.belief, l.situation, l.risk].map(function (v) { return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; }).join(",");
+    }).join("\n");
+    download("world_intelligence_field_reports.csv", csv);
+  });
+  if ($("wImportBtn")) $("wImportBtn").addEventListener("click", function () {
+    var fi = $("wImport"); if (!fi.files || !fi.files[0]) { $("wImpMsg").textContent = "Choose a CSV file first."; return; }
+    var rd = new FileReader();
+    rd.onload = function () {
+      var lines = String(rd.result).split(/\r?\n/).filter(function (x) { return x.trim(); });
+      if (lines.length < 2) { $("wImpMsg").textContent = "CSV looks empty."; return; }
+      var head = splitCsv(lines[0]).map(function (h) { return h.trim().toLowerCase(); });
+      var rows = lines.slice(1).map(function (ln) { var c = splitCsv(ln), o = {}; head.forEach(function (h, i) { o[h] = (c[i] || "").trim(); }); return o; });
+      var n = WI.api("POST", "/lrkus/import", { rows: rows });
+      $("wImpMsg").textContent = n + " field reports imported.";
+      renderBank(); refreshState();
+    };
+    rd.readAsText(fi.files[0]);
+  });
+
+  if ($("aIcs")) $("aIcs").addEventListener("click", function () {
+    var acts = WI.actions();
+    var mIx = { January: 1, February: 2, March: 3, April: 4, May: 5, June: 6, July: 7, August: 8, September: 9, October: 10, November: 11, December: 12 };
+    var yr = new Date().getFullYear(), ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Telangana Nethra//Aarogyam365//EN", "CALSCALE:GREGORIAN"];
+    acts.forEach(function (a, i) {
+      var m = mIx[a.month] || (i + 1), mm = (m < 10 ? "0" + m : "" + m);
+      ics.push("BEGIN:VEVENT", "UID:aarogyam-" + yr + mm + "@worldintelligence", "DTSTART;VALUE=DATE:" + yr + mm + "01",
+        "RRULE:FREQ=YEARLY", "SUMMARY:Aarogyam 365 — " + String(a.title).replace(/[\n,;]/g, " "),
+        "DESCRIPTION:" + String(a.telugu || "").replace(/[\n,;]/g, " "), "END:VEVENT");
+    });
+    ics.push("END:VCALENDAR");
+    var blob = new Blob([ics.join("\r\n")], { type: "text/calendar" }), el = document.createElement("a");
+    el.href = URL.createObjectURL(blob); el.download = "aarogyam_365_calendar.ics"; el.click(); URL.revokeObjectURL(el.href);
+  });
+
+  if ($("dTrans")) $("dTrans").addEventListener("input", runForecast);
+
+  /* ============================================================
+     13 — AAROGYA DARPAN TELANGANA (verified doctor access network)
+     ============================================================ */
+  var doctorMap, doctorMarkers, currentDoctorRows = [];
+  function gradeClass(g) { return g === 'A+' || g === 'A' ? 'good' : g === 'B' || g === 'C' ? 'caution' : 'danger'; }
+  function doctorColor(d) { return !d.verified ? '#F0654A' : d.accessScore100 >= 80 ? '#36D6C2' : '#F2B23C'; }
+  function fillDoctorDistrictFilter() {
+    if (!$('docDistrict')) return;
+    $('docDistrict').innerHTML = '<option value="">All Telangana</option>' + districts.map(function(d){ return '<option value="'+d.id+'">'+esc(d.district)+'</option>'; }).join('');
+  }
+  function fillDoctorSelect() {
+    if (!$('docFeedbackDoctor')) return;
+    var rows = WI.api('GET','/doctors');
+    $('docFeedbackDoctor').innerHTML = rows.map(function(d){ return '<option value="'+esc(d.id)+'">'+esc(d.name)+' · '+esc(d.district)+' · '+esc(d.accessGrade)+'</option>'; }).join('');
+  }
+  function renderDoctorProfiles() {
+    if (!$('docList')) return;
+    var rows = WI.api('POST','/doctors/search',{ term: $('docSearch') ? $('docSearch').value : '', districtId: $('docDistrict') ? $('docDistrict').value : '' });
+    currentDoctorRows = rows;
+    $('docCount').textContent = rows.length + ' profiles';
+    if (!rows.length) { $('docList').innerHTML = '<div style="color:var(--faint);font-size:13px">No doctor profiles match this search.</div>'; return; }
+    $('docList').innerHTML = rows.map(function(d){
+      var badges = (d.badges || []).slice(0,4).map(function(b){ return '<span class="badge">'+esc(b)+'</span>'; }).join('');
+      return '<div class="doc-card" data-id="'+esc(d.id)+'"><div class="doc-top"><div><b>'+esc(d.name)+'</b><span>'+esc(d.speciality)+' · '+esc(d.district)+'</span></div><div class="grade '+gradeClass(d.accessGrade)+'">'+esc(d.accessGrade)+'</div></div>'+
+        '<div class="doc-meta"><span>Reg: '+esc(d.registrationNo)+'</span><span>'+esc(d.verified ? 'Verified demo layer' : 'Unable to verify')+'</span><span>Google signal: '+esc(d.googleRating || '—')+' / '+esc(d.googleReviews || 0)+' reviews</span></div>'+
+        '<div class="doc-clinic">'+esc(d.clinic)+' · '+esc(d.timings)+' · '+esc(d.languages)+'</div><div class="badges">'+badges+'</div>'+
+        '<div class="doc-foot"><span>Public Health Access Score: <b>'+esc(d.accessScore100)+'/100</b> — '+esc(d.gradeLabel)+'</span><button class="btn sm doc-card-btn" data-id="'+esc(d.id)+'">Trust card</button></div></div>';
+    }).join('');
+    [].forEach.call(document.querySelectorAll('.doc-card-btn'), function(b){ b.addEventListener('click', function(){ renderDoctorCard(this.getAttribute('data-id')); }); });
+    fillDoctorSelect();
+    updateDoctorMap(rows);
+  }
+  function initDoctorMap() {
+    if (!$('doctorMap') || typeof L === 'undefined') return;
+    doctorMap = L.map('doctorMap',{scrollWheelZoom:false, attributionControl:false}).setView([17.9,79.2],7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:12,opacity:.45}).addTo(doctorMap);
+    doctorMarkers = L.layerGroup().addTo(doctorMap);
+  }
+  function updateDoctorMap(rows) {
+    if (!doctorMap || !doctorMarkers) return;
+    doctorMarkers.clearLayers();
+    rows = rows || currentDoctorRows || WI.api('GET','/doctors');
+    rows.forEach(function(d){
+      var c = L.circleMarker([d.lat,d.lon], { radius: d.verified ? 8 : 7, color: doctorColor(d), fillColor: doctorColor(d), fillOpacity:.55, weight:1.5 });
+      c.bindTooltip('<b>'+esc(d.name)+'</b><br>'+esc(d.speciality)+'<br>Grade '+esc(d.accessGrade)+' · '+esc(d.registrationNo), {direction:'top'});
+      doctorMarkers.addLayer(c);
+    });
+  }
+  function renderDoctorVerify() {
+    var q = ($('docVerifyQuery') && $('docVerifyQuery').value || '').trim();
+    if (!q) return;
+    var r = WI.api('POST','/doctors/verify',{ query:q });
+    var box = $('docVerifyOut');
+    if (r.doctor) {
+      var d = r.doctor;
+      box.className = 'verify-card ' + (d.verified ? 'good' : 'danger');
+      box.innerHTML = '<b>'+esc(r.status.replace(/_/g,' ')).toUpperCase()+'</b><br>'+esc(d.name)+'<br>Registration: <b>'+esc(d.registrationNo)+'</b><br>District: '+esc(d.district)+'<br>Public Health Access Grade: <b>'+esc(d.accessGrade)+'</b><br><small>'+esc(r.message)+'</small>';
+    } else {
+      box.className = 'verify-card danger';
+      box.innerHTML = '<b>UNABLE TO VERIFY</b><br>'+esc(r.message)+'<br><small>Use this as a prompt to check the official medical registry before consultation.</small>';
+    }
+    refreshState();
+  }
+  function addDoctorProfile() {
+    var r = WI.api('POST','/doctors/add',{ name:$('docName').value, registrationNo:$('docReg').value, districtId:$('docAddDistrict').value, speciality:$('docSpec').value, clinic:$('docClinic').value, timings:$('docTimings').value, languages:$('docLang').value, activities:$('docActivities').value, verified:$('docVerified').checked, responsiblePledge:$('docPledge').checked });
+    $('docAddMsg').textContent = 'Added '+r.name+' · grade '+r.accessGrade;
+    ['docName','docReg','docSpec','docClinic','docTimings','docActivities'].forEach(function(id){ if($(id)) $(id).value=''; });
+    renderDoctorProfiles(); renderDoctorGaps(); refreshState();
+  }
+  function saveDoctorFeedback() {
+    var r = WI.api('POST','/doctors/feedback',{ doctorId:$('docFeedbackDoctor').value, communication:$('dfComm').value, respect:$('dfRespect').value, waiting:$('dfWait').value, explanation:$('dfExplain').value, followup:$('dfFollow').value, privateNote:$('dfNote').value });
+    $('docFeedbackMsg').textContent = r.note || 'Saved.';
+    renderDoctorProfiles(); refreshState();
+  }
+  function renderDoctorGaps() {
+    if (!$('docGapTable')) return;
+    var rows = WI.api('GET','/doctors/gaps').slice(0,12);
+    $('docGapTable').innerHTML = rows.map(function(g){ return '<tr><td>'+esc(g.district)+'</td><td class="n">'+fmt(g.verified_profiles)+' / '+fmt(g.total_profiles)+'</td><td class="n">'+esc(g.average_access_score)+'</td><td>'+esc(g.gap)+'</td></tr>'; }).join('');
+  }
+  function renderDoctorCard(id) {
+    id = id || ($('docFeedbackDoctor') ? $('docFeedbackDoctor').value : null);
+    if (!id) return;
+    var c = WI.api('POST','/doctors/card',{ id:id });
+    if (c.error) { $('docCardOut').textContent = c.error; return; }
+    $('docCardOut').innerHTML = '<div class="qrbox">'+esc(c.code)+'</div><b>'+esc(c.doctor)+'</b><br>Registration: '+esc(c.registrationNo)+'<br>District: '+esc(c.district)+'<br>Public Health Access Grade: <b>'+esc(c.grade)+'</b><br><small>'+esc(c.disclaimer)+'</small>';
+  }
+  function bindDoctors() {
+    if (!$('docList')) return;
+    fillDoctorDistrictFilter();
+    if ($('docAddDistrict')) fillDistricts($('docAddDistrict'), 'TS23');
+    initDoctorMap(); renderDoctorProfiles(); renderDoctorGaps();
+    if ($('docVerifyBtn')) $('docVerifyBtn').addEventListener('click', renderDoctorVerify);
+    if ($('docSearchBtn')) $('docSearchBtn').addEventListener('click', renderDoctorProfiles);
+    if ($('docSearch')) $('docSearch').addEventListener('input', function(){ if (this.value.length === 0 || this.value.length > 2) renderDoctorProfiles(); });
+    if ($('docDistrict')) $('docDistrict').addEventListener('change', renderDoctorProfiles);
+    if ($('docAddBtn')) $('docAddBtn').addEventListener('click', addDoctorProfile);
+    if ($('docFeedbackBtn')) $('docFeedbackBtn').addEventListener('click', saveDoctorFeedback);
+    if ($('docGapBtn')) $('docGapBtn').addEventListener('click', renderDoctorGaps);
+    if ($('docCardBtn')) $('docCardBtn').addEventListener('click', function(){ renderDoctorCard(); });
+  }
+
+  /* ============================================================
      BOOT
      ============================================================ */
   refreshState();
@@ -667,7 +812,11 @@
   renderOps();
   renderRecalls();
   renderPatients();
+  renderRumours();
+  renderReferral();
   runForecast();
   classify();
   initMap();
+  bindDoctors();
+  try { var __h = (location.hash||'').replace('#',''); if (__h) { var __b = document.querySelector('.tab[data-tab=\''+__h+'\']'); if (__b) __b.click(); } } catch(e){}
 })();

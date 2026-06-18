@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telangana Nethra — Public Health Intelligence Network</title>
+<meta name="theme-color" content="#0A1416">
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --ink:#0A1416;--panel:#0F1E22;--panel-2:#14272C;--panel-3:#0C181B;
+    --line:#24414A;--line-soft:#1A3138;--text:#E8F1F2;--muted:#88A2AA;--faint:#5C757D;
+    --live:#36D6C2;--warn:#F2B23C;--risk:#F0654A;--gold:#C9A24A;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --maxw:1100px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--ink);color:var(--text);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  ::selection{background:rgba(54,214,194,.3)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* topbar */
+  .top{position:sticky;top:0;z-index:20;background:rgba(10,20,22,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft)}
+  .top .wrap{display:flex;align-items:center;gap:14px;height:62px}
+  .seal{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:var(--ink);background:linear-gradient(135deg,var(--live),#1fa896);box-shadow:0 6px 18px rgba(54,214,194,.25)}
+  .brand b{display:block;font-size:15px;letter-spacing:.2px}
+  .brand span{display:block;font-size:11.5px;color:var(--muted)}
+  .top nav{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .btn{display:inline-block;padding:9px 15px;border-radius:9px;font-size:13.5px;font-weight:600;border:1px solid var(--line);color:var(--text)}
+  .btn.primary{background:linear-gradient(135deg,var(--live),#1fa896);color:var(--ink);border:0}
+  .btn.ghost{background:transparent;color:var(--muted)}
+  .btn:hover{filter:brightness(1.08)}
+
+  /* hero */
+  .hero{padding:74px 0 38px;border-bottom:1px solid var(--line-soft);background:radial-gradient(1100px 380px at 70% -10%,rgba(54,214,194,.10),transparent)}
+  .kick{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--live);font-weight:700}
+  h1{font-size:clamp(30px,5vw,50px);line-height:1.08;margin:14px 0 0;letter-spacing:-.5px}
+  h1 em{font-style:normal;color:var(--live)}
+  .sub{font-size:17px;color:var(--muted);max-width:660px;margin:18px 0 0}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+  .note{margin-top:20px;font-size:12.5px;color:var(--faint);max-width:680px;border-left:2px solid var(--line);padding-left:12px;line-height:1.6}
+
+  /* loop */
+  section.block{padding:46px 0;border-bottom:1px solid var(--line-soft)}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+  .h2{font-size:23px;margin:8px 0 4px;letter-spacing:-.3px}
+  .lead{color:var(--muted);font-size:14.5px;margin:0 0 22px}
+  .loop{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .stage{border:1px solid var(--line-soft);background:var(--panel-3);border-radius:12px;padding:14px}
+  .stage .n{font-size:11px;color:var(--faint);font-weight:700}
+  .stage b{display:block;margin:6px 0 4px;font-size:15px}
+  .stage span{font-size:12px;color:var(--muted)}
+  .stage:nth-child(1) b{color:var(--live)} .stage:nth-child(5) b{color:var(--gold)}
+
+  /* modules */
+  .grp-title{font-size:13px;color:var(--text);font-weight:700;margin:26px 0 12px;display:flex;align-items:center;gap:10px}
+  .grp-title:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--live)}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .card{display:block;border:1px solid var(--line-soft);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border-radius:14px;padding:15px 16px;transition:border-color .15s,transform .15s,background .15s}
+  .card:hover{border-color:rgba(54,214,194,.5);background:#13262B;transform:translateY(-2px)}
+  .card .t{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .card .t b{font-size:14.5px}
+  .card .t .ar{color:var(--live);font-size:15px;opacity:.7}
+  .card p{margin:7px 0 0;font-size:12.5px;color:var(--muted);line-height:1.5}
+  .tagm{display:inline-block;margin-top:9px;font-size:10.5px;color:var(--faint);border:1px solid var(--line-soft);border-radius:999px;padding:3px 8px}
+
+  footer{padding:34px 0 60px;color:var(--faint);font-size:12.5px}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center}
+  @media(max-width:820px){.loop{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+
+  /* ===== unified global navigation (identical on every page) ===== */
+  .gnav{position:sticky;top:0;z-index:200;background:#0A1416;border-bottom:1px solid #1A3138;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .gnav *{box-sizing:border-box}
+  .gnav-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;height:60px;padding:0 18px}
+  .gnav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex:none}
+  .gnav-seal{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#0A1416;background:linear-gradient(135deg,#36D6C2,#1fa896);font-size:15px;flex:none}
+  .gnav-wm{display:flex;flex-direction:column;line-height:1.18}
+  .gnav-wm b{color:#E8F1F2;font-size:13.5px;letter-spacing:.2px;font-weight:700}
+  .gnav-wm>span{color:#88A2AA;font-size:10px}
+  .gnav-links{display:flex;align-items:center;gap:2px;margin-left:8px;overflow-x:auto;scrollbar-width:none}
+  .gnav-links::-webkit-scrollbar{display:none}
+  .gnav-link{display:flex;flex-direction:column;text-decoration:none;padding:7px 12px;border-radius:9px;white-space:nowrap;line-height:1.2;border:1px solid transparent}
+  .gnav-link b{color:#C2D2D5;font-size:13px;font-weight:600}
+  .gnav-link>span{color:#5C757D;font-size:10px}
+  .gnav-link:hover{background:#11242a}
+  .gnav-link:hover b{color:#E8F1F2}
+  .gnav-link.on{background:#11242a;border-color:#234047}
+  .gnav-link.on b{color:#36D6C2}
+  .gnav-search{margin-left:auto;display:flex;align-items:center;gap:7px;flex:none;text-decoration:none;background:#0F1E22;border:1px solid #234047;color:#88A2AA;font-size:12.5px;font-weight:600;padding:8px 12px;border-radius:9px;white-space:nowrap}
+  .gnav-search:hover{border-color:#36D6C2;color:#E8F1F2}
+  .gnav-search kbd{background:#0A1416;border:1px solid #234047;border-radius:5px;padding:1px 5px;font-size:10.5px;color:#88A2AA;font-family:inherit}
+  @media(max-width:860px){.gnav-wm,.gnav-link>span,.gnav-search>span{display:none}}
+</style>
+</head>
+<body>
+
+<nav class="gnav"><div class="gnav-in">
+  <a class="gnav-brand" href="Home.html" title="Home">
+    <span class="gnav-seal">నే</span>
+    <span class="gnav-wm"><b>Telangana Nethra</b><span>Public Health Intelligence</span></span>
+  </a>
+  <div class="gnav-links">
+    <a class="gnav-link on" href="Home.html"><b>Home</b><span>Overview</span></a>
+    <a class="gnav-link" href="index.html"><b>Console</b><span>The workspace</span></a>
+    <a class="gnav-link" href="ControlRoom.html"><b>Control Room</b><span>Emergency dashboard</span></a>
+    <a class="gnav-link" href="Calculators.html"><b>Calculators</b><span>Field tools &amp; R₀</span></a>
+    <a class="gnav-link" href="Sitemap.html"><b>Sitemap</b><span>Everything in one place</span></a>
+  </div>
+  <a class="gnav-search" href="index.html#search">⌕ <span>Search modules</span> <kbd>⌘K</kbd></a>
+</div></nav>
+
+<section class="hero"><div class="wrap">
+  <div class="kick">Telangana · preventive public health</div>
+  <h1>The state's <em>eye</em> on public health.</h1>
+  <p class="sub">Nethra listens to what people on the ground actually report, forecasts how a rumour or a disease moves across districts, picks the response that works, and sends a vetted Telugu message through the messenger people trust — then learns from what comes back.</p>
+  <div class="cta">
+    <a class="btn primary" href="index.html">Open the console →</a>
+    <a class="btn" href="#modules">Explore the modules ↓</a>
+  </div>
+  <p class="note">Demonstration build. Forecasts are an illustrative model running on real district populations — not a validated prediction. Doctor profiles in Aarogya Darpan are clearly-labelled samples, not real practitioners. Runs offline on a single device.</p>
+</div></section>
+
+<section class="block"><div class="wrap">
+  <div class="eyebrow">How it works</div>
+  <div class="h2">One full cycle, end to end</div>
+  <p class="lead">Five stages. Open any module below to step into it.</p>
+  <div class="loop">
+    <div class="stage"><div class="n">01</div><b>Listen</b><span>Capture real field reports as structured signals</span></div>
+    <div class="stage"><div class="n">02</div><b>Structure</b><span>Turn them into district-level intelligence</span></div>
+    <div class="stage"><div class="n">03</div><b>Forecast</b><span>Model how risk spreads, and what blunts it</span></div>
+    <div class="stage"><div class="n">04</div><b>Act</b><span>Dispatch vetted Telugu action via trusted messengers</span></div>
+    <div class="stage"><div class="n">05</div><b>Learn</b><span>Feed outcomes back to sharpen the next call</span></div>
+  </div>
+</div></section>
+
+<section class="block" id="modules"><div class="wrap">
+  <div class="eyebrow">The network</div>
+  <div class="h2">Modules</div>
+  <p class="lead">Everything is one app. Each card opens that module in the console.</p>
+
+  <div class="grp-title">The full cycle</div>
+  <div class="grid">
+    <a class="card" href="ControlRoom.html"><div class="t"><b>◉ Public Health Control Room</b><span class="ar">→</span></div><p>Two-tier emergency dashboard — state-wide alert level across six health domains, with a passcode-gated official view, R₀ escalation and decision log.</p><span class="tagm">Control room</span></a>
+    <a class="card" href="index.html#world"><div class="t"><b>Lived Reality</b><span class="ar">→</span></div><p>Capture a field report as a structured signal; it flows live into the maps and forecasts.</p><span class="tagm">Listen</span></a>
+    <a class="card" href="index.html#praja"><div class="t"><b>Praja Intelligence</b><span class="ar">→</span></div><p>District signals and a live risk map across six health domains.</p><span class="tagm">Structure</span></a>
+    <a class="card" href="index.html#darpan"><div class="t"><b>Praja Darpan</b><span class="ar">→</span></div><p>Tunable, transparent forecast of how risk spreads — and which response cuts it.</p><span class="tagm">Forecast</span></a>
+    <a class="card" href="index.html#aarogyam"><div class="t"><b>Aarogyam 365</b><span class="ar">→</span></div><p>A year-round prevention calendar with ready Telugu messages and reminders.</p><span class="tagm">Act</span></a>
+    <a class="card" href="index.html#shield"><div class="t"><b>Infodemic Shield</b><span class="ar">→</span></div><p>Classify a rumour and pull a vetted Telugu rebuttal from the myth library.</p><span class="tagm">Counter misinformation</span></a>
+    <a class="card" href="index.html#overview"><div class="t"><b>Today's worklist</b><span class="ar">→</span></div><p>One prioritised list of what needs action now, across the whole system.</p><span class="tagm">Daily driver</span></a>
+  </div>
+
+  <div class="grp-title">Frontline tools</div>
+  <div class="grid">
+    <a class="card" href="index.html#patients"><div class="t"><b>Patient Queue</b><span class="ar">→</span></div><p>Register a complaint, triage RED/AMBER/GREEN, auto-raise a follow-up for danger signs.</p><span class="tagm">Triage</span></a>
+    <a class="card" href="index.html#recall"><div class="t"><b>NCD Recall</b><span class="ar">→</span></div><p>Chase BP/diabetes patients who missed follow-up; send the Telugu reminder.</p><span class="tagm">Close the gap</span></a>
+    <a class="card" href="index.html#safety"><div class="t"><b>Safety Guard</b><span class="ar">→</span></div><p>Danger-sign triage plus an offline referral field guide in English + Telugu.</p><span class="tagm">When to refer</span></a>
+    <a class="card" href="index.html#voice"><div class="t"><b>Jeevana Voice</b><span class="ar">→</span></div><p>Key-free voice answers that route every danger sign to care.</p><span class="tagm">Kiosk</span></a>
+    <a class="card" href="Calculators.html"><div class="t"><b>Public-Health Calculators</b><span class="ar">→</span></div><p>~20 field calculators — incidence, CFR, sample size, BMI, plus an R₀ spread estimator.</p><span class="tagm">Tools</span></a>
+  </div>
+
+  <div class="grp-title">Plan &amp; coordinate</div>
+  <div class="grid">
+    <a class="card" href="index.html#trust"><div class="t"><b>Trust Network</b><span class="ar">→</span></div><p>Pick the messenger a community actually trusts for each domain.</p><span class="tagm">Messengers</span></a>
+    <a class="card" href="index.html#ops"><div class="t"><b>PHC Ops</b><span class="ar">→</span></div><p>An accountable task checklist for the field team.</p><span class="tagm">Action</span></a>
+    <a class="card" href="index.html#brief"><div class="t"><b>Minister Brief</b><span class="ar">→</span></div><p>A printable 7-day public-health intelligence brief for decision-makers.</p><span class="tagm">Decide</span></a>
+  </div>
+
+  <div class="grp-title">Citizen access</div>
+  <div class="grid">
+    <a class="card" href="index.html#doctors"><div class="t"><b>Aarogya Darpan</b><span class="ar">→</span></div><p>Verify-before-visit, a doctor access map, and an access-gap view — an anti-quackery transparency layer. Verification points to the official NMC/TSMC register.</p><span class="tagm">Anti-quackery</span></a>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div>Telangana Nethra — Public Health Intelligence Network · demonstration build</div>
+  <a class="btn ghost" href="index.html">Open console →</a>
+</div></footer>
+
+</body>
+</html>
